@@ -14,11 +14,11 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 speicherort = 'tmp\ppo_viele_states\MV_ppo_18'
 
-model = pfad + '\RL_Sim_20230225.spp'
+model = pfad + '\RL_Sim_20230226.spp'
 
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=model,
-                        socket=None, visible=False)
+                        socket=None, visible=True)
     env = Environment(plantsim)  # env = gym.make('InvertedPendulumBulletEnv-v0')
     # Nachkommastelle an N anfügen, um das Lernen auszuschalten
     N = 1500000000  # 30 to 5000 steps between training # or done [line 96]
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         done = False
         score = 0
         step = 0
-        count = 1
+        #count = 1
         # current_state = env.problem.get_current_state()
         observation = None  # current_state.to_state()
         # while True:
@@ -85,13 +85,15 @@ if __name__ == '__main__':
             a = env.problem.actions[action]
             env.problem.act(a)
 
-            env.problem.plantsim.execute_simtalk("GetCurrentState")
+            #env.problem.plantsim.execute_simtalk("GetCurrentState")
             current_state = env.problem.get_current_state()
             observation_ = current_state.to_state()
-            reward = env.problem.get_reward(current_state)
+            # Die Schnittstelle ist so eingestellt, dass in der Umgebung Kosten
+            # Anstatt eines Reward angegeben werden, deswegen *-1
+            reward = -1 * env.problem.get_reward(current_state)
             done = env.problem.is_goal_state(current_state)
-            if reward > 0 and not done:
-                count += reward
+            #if reward > 0 and not done:
+            #    count += reward
             # print("Step " + str(step) + ": " + a + " - Reward: " + str(reward) + " - finished: " + str(
             #    count - 1) + "\n")  # + " - " + str(round((step / count), 3)) +
             n_steps += 1
@@ -107,14 +109,14 @@ if __name__ == '__main__':
             # print(observation)
 
         if done:
-            Lieferterminabweichung.append(env.problem.plantsim.get_value('Verspätung'))
+            '''Lieferterminabweichung.append(env.problem.plantsim.get_value('Verspätung'))
             performance_train.append(score)
             avg_score = np.mean(performance_train[-100:])
 
             with open("tmp\ppo_viele_states\ppo_performance_train_18.txt", "w") as output:
                 output.write(str(performance_train))
             with open("tmp\ppo_viele_states\ppo_performance_train_18_verspaetung.txt", "w") as output:
-                output.write(str(Lieferterminabweichung))
+                output.write(str(Lieferterminabweichung))'''
 
             if np.mean(performance_train[-1:]) > best_score:
                 best_score = np.mean(performance_train[-1:])
