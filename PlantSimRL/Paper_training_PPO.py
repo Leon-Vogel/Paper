@@ -11,16 +11,11 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 # pfad = 'D:\\Studium\Projekt\Methodenvergleich\PlantSimulationRL\simulations'
 # pfad = 'C:\\Users\leonv\Documents\Programmierungen_Studium\PlantSimulationRL\simulations'
-pfad = 'C:\\Users\leonv\Documents\Methodenvergleich\simulations'
-# model = pfad + '\Methodenvergleich_20220909_mitLager.spp'
+pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 speicherort = 'tmp\ppo_viele_states\MV_ppo_18'
 
-model = pfad + '\Methodenvergleich_20220917_real_mitTyp_viele_states.spp'
-#model = pfad + '\Methodenvergleich_20220916_Naiver_reward_wenig_states.spp'
-# model = pfad + '\Methodenvergleich_20220915_Naiver_reward_wenig_states.spp'
-# model = pfad + '\Methodenvergleich_20220914_real_mitTyp.spp'
-# model = pfad + '\Methodenvergleich_20220913_real.spp'
-# model = pfad + '\Methodenvergleich_20220911_mitLager.spp'
+model = pfad + '\RL_Sim_20230225.spp'
+
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=model,
                         socket=None, visible=False)
@@ -48,13 +43,13 @@ if __name__ == '__main__':
     max_iterations = 300
     filename = 'PPO_training_20220917.png'
     figure_file = 'tmp/ppo_viele_states/' + filename
-    best_score = 192.0  # 716 # 822 # 3932
+    best_score = 00  # 716 # 822 # 3932
     performance_train = []
     Lieferterminabweichung = []
     learn_iters = 0
     avg_score = 0
     n_steps = 0
-    load_checkpoint = True  # True False
+    load_checkpoint = False  # True False
     save_changes = True
 
     if load_checkpoint:
@@ -89,8 +84,8 @@ if __name__ == '__main__':
             action, prob, val = agent.choose_action(observation)
             a = env.problem.actions[action]
             env.problem.act(a)
-            # sleep(0.001)
-            # env.problem.plantsim.execute_simtalk("GetCurrentState")
+
+            env.problem.plantsim.execute_simtalk("GetCurrentState")
             current_state = env.problem.get_current_state()
             observation_ = current_state.to_state()
             reward = env.problem.get_reward(current_state)
