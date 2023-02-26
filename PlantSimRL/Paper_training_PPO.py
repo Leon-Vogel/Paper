@@ -41,7 +41,7 @@ if __name__ == '__main__':
                      alpha=alpha, n_epochs=n_epochs, speicherort=speicherort)
 
     max_iterations = 300
-    filename = 'PPO_training_20220917.png'
+    filename = 'PPO_20230226.png'
     figure_file = 'tmp/ppo_viele_states/' + filename
     best_score = 00  # 716 # 822 # 3932
     performance_train = []
@@ -109,11 +109,10 @@ if __name__ == '__main__':
             # print(observation)
 
         if done:
-            '''Lieferterminabweichung.append(env.problem.plantsim.get_value('Verspätung'))
             performance_train.append(score)
             avg_score = np.mean(performance_train[-100:])
 
-            with open("tmp\ppo_viele_states\ppo_performance_train_18.txt", "w") as output:
+            '''with open("tmp\ppo_viele_states\ppo_performance_train_18.txt", "w") as output:
                 output.write(str(performance_train))
             with open("tmp\ppo_viele_states\ppo_performance_train_18_verspaetung.txt", "w") as output:
                 output.write(str(Lieferterminabweichung))'''
@@ -129,7 +128,7 @@ if __name__ == '__main__':
                     agent.load_models()'''
 
             print('///Episode', i, '-- Return %.1f' % score, '-- avg Return %.1f' % avg_score,
-                  '-- best 10 scores %.1f' % best_score,
+                  '-- best  score %.1f' % best_score,
                   '-- time_steps:', n_steps, '-- learning_steps:', learn_iters)
             print(
                 '//////////////////////////////////////////////////////////////////////////////////////////////////// \n '
