@@ -12,9 +12,9 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # pfad = 'D:\\Studium\Projekt\Methodenvergleich\PlantSimulationRL\simulations'
 # pfad = 'C:\\Users\leonv\Documents\Programmierungen_Studium\PlantSimulationRL\simulations'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-speicherort = 'tmp\ppo_viele_states\MV_ppo_18'
+speicherort = 'tmp\PPO_Sortieren_1.2_20230227'
 
-model = pfad + '\RL_Sim_20230227.spp'
+model = pfad + '\RL_Sim_20230227_Sortieren_1_2.spp'
 
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=model,
@@ -41,15 +41,15 @@ if __name__ == '__main__':
                      alpha=alpha, n_epochs=n_epochs, speicherort=speicherort)
 
     max_iterations = 300
-    filename = 'PPO_20230227.png'
+    filename = 'PPO_20230227_1.2.png'
     figure_file = 'tmp/' + filename
-    best_score = 00  # 716 # 822 # 3932
+    best_score = 280  # 716 # 822 # 3932
     performance_train = []
     Lieferterminabweichung = []
     learn_iters = 0
     avg_score = 0
     n_steps = 0
-    load_checkpoint = False  # True False
+    load_checkpoint = True  # True False
     save_changes = True
 
     if load_checkpoint:
@@ -117,9 +117,9 @@ if __name__ == '__main__':
             with open("tmp\ppo_viele_states\ppo_performance_train_18_verspaetung.txt", "w") as output:
                 output.write(str(Lieferterminabweichung))'''
 
-            if np.mean(performance_train[-1:]) > best_score:
-                best_score = np.mean(performance_train[-1:])
-                if save_changes:
+            if np.mean(performance_train[-5:]) > best_score:
+                best_score = np.mean(performance_train[-5:])
+                if save_changes and i > 4:
                     agent.save_models()
 
             '''if len(performance_train) > 0:

@@ -12,8 +12,9 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # pfad = 'D:\\Studium\Projekt\Methodenvergleich\PlantSimulationRL\simulations'
 # pfad = 'C:\\Users\leonv\Documents\Programmierungen_Studium\PlantSimulationRL\simulations'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-speicherort = 'tmp\PPO_Sortieren_20230226'
+speicherort = 'tmp\PPO_Sortieren_1.1_20230226'
 
+# In dieser Sim ist der Reward nur für richtig/falsch produzierte Aufträge
 model = pfad + '\RL_Sim_20230226_Sortieren.spp'
 
 if __name__ == '__main__':
@@ -41,7 +42,7 @@ if __name__ == '__main__':
                      alpha=alpha, n_epochs=n_epochs, speicherort=speicherort)
 
     max_iterations = 300
-    filename = 'PPO_20230226.png'
+    filename = 'PPO_20230226_1.1.png'
     figure_file = 'tmp/' + filename
     best_score = 00  # 716 # 822 # 3932
     performance_train = []
