@@ -141,7 +141,7 @@ class Environment(gym.Env):
         plantsim.start_simulation()
 
         actions = self.problem.actions
-        self.action_space = spaces.Discrete(actions)
+        self.action_space = spaces.Discrete(len(actions))
         self.observation_space = spaces.Box(low=np.array([liste[0] for liste in self.problem.states.values()]),
                                             high=np.array([liste[1] for liste in self.problem.states.values()]),
                                             dtype=np.uint8)
@@ -153,7 +153,10 @@ class Environment(gym.Env):
         observation = current_state.to_state()
         reward = -1 * self.problem.get_reward(current_state)
         done = self.problem.is_goal_state(current_state)
-        info = None
+        info = {}
+        print(observation)
+        print('-- Return %.1f' % reward)
+        print('-- done: '+ str(done))
         return observation, reward, done, info
 
     def reset(self):

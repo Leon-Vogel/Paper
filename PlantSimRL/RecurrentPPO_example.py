@@ -26,3 +26,43 @@ while True:
     obs, rewards, dones, info = env.step(action)
     episode_starts = dones
     env.render()
+
+
+'''
+import gym
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
+from stable_baselines3.common.results_plotter import load_results, ts2xy
+from stable_baselines3.common import logger
+from stable_baselines3.common.monitor import Monitor
+import os
+
+# Initialisiere das Environment
+env_id = 'CartPole-v0'
+env = gym.make(env_id)
+env = Monitor(env, log_dir, allow_early_resets=True)
+
+# Erstelle ein Vectorized Environment
+env = DummyVecEnv([lambda: env])
+
+# Initialisiere das Modell
+model = PPO('MlpPolicy', env, tensorboard_log=log_dir)
+
+# Initialisiere Callbacks
+eval_callback = EvalCallback(env, best_model_save_path=log_dir, log_path=log_dir, eval_freq=10000, n_eval_episodes=5)
+stop_callback = StopTrainingOnRewardThreshold(reward_threshold=200, verbose=1)
+
+# Trainiere das Modell
+model.learn(total_timesteps=100000, callback=[eval_callback, stop_callback])
+
+# Visualisiere die Trainingsergebnisse mit Tensorboard
+results = load_results(log_dir)
+x, y = ts2xy(results, 'timesteps')
+logger.configure(log_dir)
+logger.record('timesteps', x[-1])
+logger.record('mean_reward', y[-1])
+logger.dumpkvs()
+os.system(f"tensorboard --logdir {log_dir} --port 6006")
+
+'''
