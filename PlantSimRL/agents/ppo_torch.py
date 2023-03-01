@@ -114,6 +114,7 @@ class CriticNetwork(nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
+        print(self.device)
 
     def forward(self, state):
         value = self.critic(state)
@@ -133,7 +134,7 @@ class PPOAgent:
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
-        self.gae_lambda = gae_lambda#
+        self.gae_lambda = gae_lambda
         self.location = speicherort
 
         self.actor = ActorNetwork(n_actions, input_dims, alpha, location=speicherort)

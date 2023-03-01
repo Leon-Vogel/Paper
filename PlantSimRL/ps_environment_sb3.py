@@ -1,11 +1,13 @@
+import itertools
+from random import seed
+from time import sleep
+
+import gym
+import numpy as np
+from gym import spaces
+
 from plantsim.plantsim import Plantsim
 from problem import Problem
-from random import seed
-import itertools
-from time import sleep
-import gym
-from gym import spaces
-import numpy as np
 
 
 class PlantSimulationProblem(Problem):
@@ -57,7 +59,7 @@ class PlantSimulationProblem(Problem):
                 if value in values:
                     self.plantsim.set_value(f"ActionControl[\"{label}\",1]", value)
         self.plantsim.set_value("ActionControl[\"action\",1]", action)
-        #print("Step "+str(self.step)+": "+action+"\n")
+        # print("Step "+str(self.step)+": "+action+"\n")
         self.plantsim.execute_simtalk("AIControl")
         if not self.plantsim.plantsim.IsSimulationRunning():
             self.plantsim.start_simulation()
@@ -80,11 +82,11 @@ class PlantSimulationProblem(Problem):
         :return:
         """
         while not self.plantsim.get_value("ready"):
-            sleep(0.001)
+            sleep(0.00001)
             print("sleep")
         if self.next_event:
             self.state = []
-            #states = self.plantsim.get_next_message()
+            # states = self.plantsim.get_next_message()
             states = self.plantsim.get_current_state()
             if states == None:
                 print("kein state")
@@ -97,7 +99,7 @@ class PlantSimulationProblem(Problem):
                     self.goal_state = value
                 else:
                     self.state.append(value)
-                    #print(key +":  "+ str(value))
+                    # print(key +":  "+ str(value))
             if states.items() == None:
                 print("kein state")
             self.next_event = False
@@ -116,7 +118,7 @@ class PlantSimulationProblem(Problem):
 
     def get_reward(self, state):
         reward = -self.eval(state)
-        #print("Reward: "+str(reward))
+        # print("Reward: "+str(reward))
         return reward
 
     def reset(self):
@@ -133,6 +135,12 @@ class Environment(gym.Env):
     metadata = {"render.modes": ["human"]}
 
     def __init__(self, plantsim: Plantsim, seed_value=1):
+        self.done = None
+        self.current_state = None
+        self.observation = None
+        self.new_observation = None
+        self.reward = None
+        self.info = None
 
         if seed_value is not None:
             seed(seed_value)
@@ -144,29 +152,33 @@ class Environment(gym.Env):
         self.action_space = spaces.Discrete(len(actions))
         self.observation_space = spaces.Box(low=np.array([liste[0] for liste in self.problem.states.values()]),
                                             high=np.array([liste[1] for liste in self.problem.states.values()]),
-                                            dtype=np.uint8)
+                                            dtype=float)
 
     def step(self, action):
-        a = self.problem.actions[action]
+        a = int(action[0])
+        a = self.problem.actions[a]
         self.problem.act(a)
-        current_state = self.problem.get_current_state()
-        observation = current_state.to_state()
-        reward = -1 * self.problem.get_reward(current_state)
-        done = self.problem.is_goal_state(current_state)
-        info = {}
-        print(observation)
-        print('-- Return %.1f' % reward)
-        print('-- done: '+ str(done))
-        return observation, reward, done, info
+        self.current_state = self.problem.get_current_state()
+        self.new_observation = np.array(self.current_state.to_state())
+        self.reward = -1 * self.problem.get_reward(self.current_state)
+        self.done = self.problem.is_goal_state(self.current_state)
+        self.info = {}
+        '''print(self.new_observation)
+        print('-- Return %.1f' % self.reward)
+        print('-- done: '+ str(self.done))'''
+        return self.new_observation, self.reward, self.done, self.info
 
     def reset(self):
         self.problem.plantsim.execute_simtalk("reset")
         self.problem.plantsim.reset_simulation()
         self.problem.reset()
         self.problem.plantsim.start_simulation()
-        current_state = self.problem.get_current_state()
-        observation = current_state.to_state()
-        return observation
+        self.problem.plantsim.execute_simtalk("GetCurrentState")
+        self.current_state = self.problem.get_current_state()
+        self.observation = np.array(self.current_state.to_state())
+        print('#####Reset')
+        # self.done = False
+        return self.observation
 
     def render(self, mode='human'):
         ...

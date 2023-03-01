@@ -10,6 +10,8 @@ from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewar
 from stable_baselines3.common.results_plotter import load_results, ts2xy
 from stable_baselines3.common.evaluation import evaluate_policy
 from torch.nn import functional as F
+from stable_baselines3.common.env_checker import check_env
+from CustomCallbacks import CustomCallback
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -17,31 +19,48 @@ pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 speicherort = 'tmp\PPO_sb3'
 logs = speicherort + '.\logs\\'
 os.makedirs(logs, exist_ok=True)
-simulation = pfad + '\RL_Sim_20230227.spp'
+simulation = pfad + '\RL_Sim_20230228.spp'
 
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=simulation,
-                        socket=None, visible=True)
+                        socket=None, visible=False)
     env = Environment(plantsim)
+    # print('Check env:')
+    # check_env(env)
+    # print('######### Check finished.')
     env = Monitor(env, logs)
 
-    #net_arch = [dict(pi=[64, 64], vf=[64, 64])]
-    #activation_fn = F.relu
+    policy_kwargs = dict(activation_fn=T.nn.ReLU, net_arch=[256, 128, 64])
 
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logs,
+    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logs, learning_rate=3e-4, n_epochs=5, clip_range=0.15,
                 device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
-                n_steps=320)
+                n_steps=512, policy_kwargs=policy_kwargs)
 
+    rollout_callback = CustomCallback(env)
     stop_callback = StopTrainingOnRewardThreshold(reward_threshold=300, verbose=1)
-    eval_callback = EvalCallback(eval_env=env, best_model_save_path=speicherort, log_path=logs, eval_freq=50,
-                                 n_eval_episodes=3, callback_on_new_best=stop_callback)
+    eval_callback = EvalCallback(eval_env=env, best_model_save_path=speicherort, log_path=logs, eval_freq=2000,
+                                 n_eval_episodes=1, callback_on_new_best=stop_callback)
 
-    model.learn(total_timesteps=100, callback=[eval_callback, stop_callback], tb_log_name="first_run")
+    # model = PPO.load(speicherort + 'ppo', env)
+    model.learn(total_timesteps=40000, callback=[rollout_callback, eval_callback],
+                tb_log_name="first_run", progress_bar=True)
+    model.save(speicherort + '\ppo_model')
+
+
+
+
+
+
+
+
+
+
+
 
     # Visualisiere die Trainingsergebnisse mit Tensorboard
-    os.system(f"tensorboard --logdir {logs} --port 6006")
+    # os.system(f"tensorboard --logdir {logs} --port 6006")
 
-    env = model.get_env()
+    '''env = model.get_env()
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
     print(mean_reward)
     model.save(speicherort + 'ppo')
@@ -57,4 +76,4 @@ if __name__ == '__main__':
         action, lstm_states = model.predict(obs, state=lstm_states, episode_start=episode_starts, deterministic=True)
         obs, rewards, dones, info = env.step(action)
         episode_starts = dones
-        # env.render()
+        # env.render()'''
