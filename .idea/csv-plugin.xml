@@ -31,6 +31,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\PlantSimRL\tmp\Recurrent_PPO_sb3\logs\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

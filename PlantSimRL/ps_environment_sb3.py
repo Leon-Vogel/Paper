@@ -1,4 +1,5 @@
 import itertools
+import random
 from random import seed
 from time import sleep
 
@@ -82,7 +83,7 @@ class PlantSimulationProblem(Problem):
         :return:
         """
         while not self.plantsim.get_value("ready"):
-            sleep(0.00001)
+            sleep(0.0000001)
             print("sleep")
         if self.next_event:
             self.state = []
@@ -141,6 +142,14 @@ class Environment(gym.Env):
         self.new_observation = None
         self.reward = None
         self.info = None
+        self.plan = {
+            'Typ1': [93, 79, 90, 93, 91, 70, 95, 89, 78, 98],
+            'Typ2': [86, 73, 69, 89, 85, 74, 71, 61, 86, 67],
+            'Typ3': [53, 75, 59, 56, 65, 73, 66, 76, 60, 61],
+            'Typ4': [35, 40, 47, 33, 33, 43, 35, 43, 40, 36],
+            'Typ5': [33, 33, 35, 29, 26, 40, 33, 31, 36, 38],
+            'Total': [300, 300, 300, 300, 300, 300, 300, 300, 300, 300]
+        }
 
         if seed_value is not None:
             seed(seed_value)
@@ -155,7 +164,8 @@ class Environment(gym.Env):
                                             dtype=float)
 
     def step(self, action):
-        a = int(action[0])
+        # a = int(action[0]) # für die eigene Lern Methode
+        a = action  # für die sb3 model.learn
         a = self.problem.actions[a]
         self.problem.act(a)
         self.current_state = self.problem.get_current_state()
@@ -172,12 +182,20 @@ class Environment(gym.Env):
         self.problem.plantsim.execute_simtalk("reset")
         self.problem.plantsim.reset_simulation()
         self.problem.reset()
+        # Plan schreiben
+        i = random.randint(0, 9)
+        self.problem.plantsim.set_value("Typ_Soll[\"Typ1\",1]", self.plan['Typ1'][i])
+        self.problem.plantsim.set_value("Typ_Soll[\"Typ2\",1]", self.plan['Typ2'][i])
+        self.problem.plantsim.set_value("Typ_Soll[\"Typ3\",1]", self.plan['Typ3'][i])
+        self.problem.plantsim.set_value("Typ_Soll[\"Typ4\",1]", self.plan['Typ4'][i])
+        self.problem.plantsim.set_value("Typ_Soll[\"Typ5\",1]", self.plan['Typ5'][i])
+        self.problem.plantsim.set_value("Typ_Soll[\"Total\",1]", self.plan['Total'][i])
         self.problem.plantsim.start_simulation()
         self.problem.plantsim.execute_simtalk("GetCurrentState")
         self.current_state = self.problem.get_current_state()
         self.observation = np.array(self.current_state.to_state())
         print('#####Reset')
-        # self.done = False
+        self.done = False
         return self.observation
 
     def render(self, mode='human'):

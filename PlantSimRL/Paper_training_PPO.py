@@ -13,13 +13,16 @@ from torch.nn import functional as F
 from stable_baselines3.common.env_checker import check_env
 from CustomCallbacks import CustomCallback
 
+
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 speicherort = 'tmp\PPO_sb3'
 logs = speicherort + '.\logs\\'
 os.makedirs(logs, exist_ok=True)
-simulation = pfad + '\RL_Sim_20230228.spp'
+simulation = pfad + '\RL_Sim_20230301.spp'
+
+Modell_laden = True  # True False
 
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=simulation,
@@ -30,22 +33,26 @@ if __name__ == '__main__':
     # print('######### Check finished.')
     env = Monitor(env, logs)
 
-    policy_kwargs = dict(activation_fn=T.nn.ReLU, net_arch=[256, 128, 64])
+    policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64]))
 
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logs, learning_rate=3e-4, n_epochs=5, clip_range=0.15,
-                device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
-                n_steps=512, policy_kwargs=policy_kwargs)
+    if Modell_laden:
+        model = PPO.load(speicherort + '\\best_model', env)
+    else:
+        model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logs, learning_rate=3e-4, n_epochs=10, clip_range=0.15,
+                    device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=0.15,
+                    n_steps=384, policy_kwargs=policy_kwargs)
 
     rollout_callback = CustomCallback(env)
-    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=300, verbose=1)
+    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=0, verbose=1)
     eval_callback = EvalCallback(eval_env=env, best_model_save_path=speicherort, log_path=logs, eval_freq=2000,
-                                 n_eval_episodes=1, callback_on_new_best=stop_callback)
+                                 n_eval_episodes=2, callback_on_new_best=stop_callback)
 
-    # model = PPO.load(speicherort + 'ppo', env)
-    model.learn(total_timesteps=40000, callback=[rollout_callback, eval_callback],
+    # 50000 timestep dauern ~ 1std.
+    model.learn(total_timesteps=70000, callback=[rollout_callback, eval_callback],
                 tb_log_name="first_run", progress_bar=True)
     model.save(speicherort + '\ppo_model')
 
+    env.close()
 
 
 

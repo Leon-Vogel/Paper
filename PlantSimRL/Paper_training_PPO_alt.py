@@ -12,9 +12,9 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # pfad = 'D:\\Studium\Projekt\Methodenvergleich\PlantSimulationRL\simulations'
 # pfad = 'C:\\Users\leonv\Documents\Programmierungen_Studium\PlantSimulationRL\simulations'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-speicherort = 'tmp\ppo_viele_states\MV_ppo_18'
+speicherort = 'tmp\ppo_altes_modell\Test'
 
-model = pfad + '\RL_Sim_20230227.spp'
+model = pfad + '\RL_Sim_20230301.spp'
 
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=model,
@@ -41,9 +41,9 @@ if __name__ == '__main__':
                      alpha=alpha, n_epochs=n_epochs, speicherort=speicherort)
 
     max_iterations = 300
-    filename = 'PPO_20230227.png'
+    filename = 'PPO_20230301.png'
     figure_file = 'tmp/' + filename
-    best_score = 00  # 716 # 822 # 3932
+    best_score = -2000  # 716 # 822 # 3932
     performance_train = []
     Lieferterminabweichung = []
     learn_iters = 0
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         done = False
         score = 0
         step = 0
-        #count = 1
+        # count = 1
         # current_state = env.problem.get_current_state()
         observation = None  # current_state.to_state()
         # while True:
@@ -85,14 +85,14 @@ if __name__ == '__main__':
             a = env.problem.actions[action]
             env.problem.act(a)
 
-            #env.problem.plantsim.execute_simtalk("GetCurrentState")
+            # env.problem.plantsim.execute_simtalk("GetCurrentState")
             current_state = env.problem.get_current_state()
             observation_ = current_state.to_state()
             # Die Schnittstelle ist so eingestellt, dass in der Umgebung Kosten
-            # Anstatt eines Reward angegeben werden, deswegen *-1
+            # anstatt eines Reward angegeben werden, deswegen *-1
             reward = -1 * env.problem.get_reward(current_state)
             done = env.problem.is_goal_state(current_state)
-            #if reward > 0 and not done:
+            # if reward > 0 and not done:
             #    count += reward
             # print("Step " + str(step) + ": " + a + " - Reward: " + str(reward) + " - finished: " + str(
             #    count - 1) + "\n")  # + " - " + str(round((step / count), 3)) +
@@ -102,8 +102,8 @@ if __name__ == '__main__':
             if n_steps % N == 0 or done:
                 print('---------learning--------')
                 agent.learn()
-                #if done:
-                    #agent.memory.clear_memory()
+                # if done:
+                # agent.memory.clear_memory()
                 learn_iters += 1
             observation = observation_
             # print(observation)
