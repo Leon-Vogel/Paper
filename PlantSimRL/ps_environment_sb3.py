@@ -179,6 +179,15 @@ class Environment(gym.Env):
         return self.new_observation, self.reward, self.done, self.info
 
     def reset(self):
+        if self.done:
+            print('Done Erfolg')
+            print('Typ1: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ1\",1]")))  # Tabelle für Metrik
+            print('Typ2: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ2\",1]")))
+            print('Typ3: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ3\",1]")))
+            print('Typ4: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ4\",1]")))
+            print('Typ5: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ5\",1]")))
+            print('Evaluation Warteschlangen: ' + str(self.problem.plantsim.get_value("Bewertung[\"Warteschlangen\",1]")))
+            print('Evaluation Auslastung: ' + str(self.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]")))
         self.problem.plantsim.execute_simtalk("reset")
         self.problem.plantsim.reset_simulation()
         self.problem.reset()

@@ -13,7 +13,6 @@ from torch.nn import functional as F
 from stable_baselines3.common.env_checker import check_env
 from CustomCallbacks import CustomCallback
 
-
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
@@ -21,9 +20,9 @@ pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 speicherort = 'tmp\PPO_sb3'
 logs = speicherort + '.\logs\\'
 os.makedirs(logs, exist_ok=True)
-simulation = pfad + '\RL_Sim_20230310.spp'
+simulation = pfad + '\RL_Sim_20230301.spp'
 
-Modell_laden = False  # True False
+Modell_laden = True  # True False
 
 if __name__ == '__main__':
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell', model=simulation,
@@ -55,33 +54,22 @@ if __name__ == '__main__':
 
     env.close()
 
+# Parameter für alle Trainings festlegen, Netz, lernrate etc.
+# Directory für Ergebnisse definieren (evtl mit Dictionary?)
+
+# Für alle intermediate Rewardfunktionen: Lade Sim
+
+# Erstelle PPO Agent in eigener Directory, trainiere für 100.000 Schritte, speichern etc.
+# Evaluiere Agent, Ergebnisse Dokumentieren
+
+# Erstelle PPO LSTM Agent in eigener Directory, trainiere für 100.000 Schritte, speichern etc.
+# Evaluiere Agent, Ergebnisse Dokumentieren
 
 
+# Für alle sparse Rewardfunktionen: Lade Sim
 
+# Erstelle PPO Agent in eigener Directory, trainiere für 100.000 Schritte, speichern etc.
+# Evaluiere Agent, Ergebnisse Dokumentieren
 
-
-
-
-
-
-
-    # Visualisiere die Trainingsergebnisse mit Tensorboard
-    # os.system(f"tensorboard --logdir {logs} --port 6006")
-
-    '''env = model.get_env()
-    mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
-    print(mean_reward)
-    model.save(speicherort + 'ppo')
-    del model
-
-    model = PPO.load(speicherort + 'ppo')
-    obs = env.reset()
-    lstm_states = None
-    num_envs = 1
-    # Episode start signals are used to reset the lstm states
-    episode_starts = np.ones((num_envs,), dtype=bool)
-    while True:
-        action, lstm_states = model.predict(obs, state=lstm_states, episode_start=episode_starts, deterministic=True)
-        obs, rewards, dones, info = env.step(action)
-        episode_starts = dones
-        # env.render()'''
+# Erstelle PPO LSTM Agent in eigener Directory, trainiere für 100.000 Schritte, speichern etc.
+# Evaluiere Agent, Ergebnisse Dokumentieren

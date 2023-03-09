@@ -16,7 +16,6 @@ from ps_environment_sb3 import Environment
 from utils import plot_learning_curve
 from CustomCallbacks import CustomCallback
 
-
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
@@ -56,4 +55,3 @@ if __name__ == '__main__':
     model.save(speicherort + '\\recurrent_ppo_model')
 
     env.close()
-

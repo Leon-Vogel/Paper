@@ -30,7 +30,6 @@ class CustomCallback(BaseCallback):
         # self.parent = None  # type: Optional[BaseCallback]
 
     def _on_step(self) -> bool:
-        # your code here
         return True  # return False to stop the training early
 
     def _on_rollout_start(self) -> None:
