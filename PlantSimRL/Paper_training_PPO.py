@@ -16,8 +16,8 @@ from CustomCallbacks import CustomCallback
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-# pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
+# pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
+pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 speicherort = 'tmp\PPO_sb3'
 logs = speicherort + '.\logs\\'
 os.makedirs(logs, exist_ok=True)
@@ -42,11 +42,13 @@ if __name__ == '__main__':
         model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logs, learning_rate=3e-4, n_epochs=10, clip_range=0.15,
                     device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=0.15,
                     n_steps=384, policy_kwargs=policy_kwargs)
+    # mehrere episoden für generalisierung
+
 
     rollout_callback = CustomCallback(env)
     stop_callback = StopTrainingOnRewardThreshold(reward_threshold=0, verbose=1)
     eval_callback = EvalCallback(eval_env=env, best_model_save_path=speicherort, log_path=logs, eval_freq=2000,
-                                 n_eval_episodes=2, callback_on_new_best=stop_callback)
+                                 n_eval_episodes=3, callback_on_new_best=stop_callback)
 
     # 50000 timestep dauern ~ 1std.
     model.learn(total_timesteps=70000, callback=[rollout_callback, eval_callback],
