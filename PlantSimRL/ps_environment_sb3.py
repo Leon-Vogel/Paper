@@ -174,7 +174,7 @@ class Environment(gym.Env):
         self.done = self.problem.is_goal_state(self.current_state)
         self.info = {}
         if self.done:
-            print('Done Erfolg')
+            # print('Done Erfolg')
             self.info['Typ1'] = self.problem.plantsim.get_value("Bewertung[\"Typ1\",1]")  # Tabelle für Metrik
             self.info['Typ2'] = self.problem.plantsim.get_value("Bewertung[\"Typ2\",1]")
             self.info['Typ3'] = self.problem.plantsim.get_value("Bewertung[\"Typ3\",1]")

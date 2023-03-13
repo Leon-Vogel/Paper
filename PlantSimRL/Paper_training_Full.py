@@ -24,10 +24,11 @@ pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 erg = 'ergebnisse\\'
 mod = 'models\\'
 Training = {
-    'Sim': [pfad + '\RL_Sim_20230310.spp', pfad + '\RL_Sim_20230313_sparse.spp', pfad + '\RL_Sim_20230310.spp',
+    'Sim': [pfad + '\RL_Sim_20230314_inter.spp', pfad + '\RL_Sim_20230313_sparse.spp',
+            pfad + '\RL_Sim_20230314_inter.spp',
             pfad + '\RL_Sim_20230313_sparse.spp'],
     'Logs': [erg + 'R_In_PPO', erg + 'R_Sp_PPO', erg + 'R_In_PPO_LSTM', erg + 'R_Sp_PPO_LSTM'],
-    'Logname': ['256_128_64', '256_128_64', '256_128_64', '256_128_64'],
+    'Logname': ['128-64-32', '128-64-32', '128-64-32', '128-64-32'],
     'Model': [mod + 'R_In_PPO', mod + 'R_Sp_PPO', mod + 'R_In_PPO_LSTM', mod + 'R_Sp_PPO_LSTM']
 }
 '''
@@ -41,21 +42,58 @@ Training = {
 }'''
 # os.makedirs(logs, exist_ok=True)
 # policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 256, 128, 64], vf=[256, 256, 128, 64]))
-policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64]))
+# policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64]))
+policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[128, 64, 32], vf=[128, 64, 32]))
 # policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[128, 64], vf=[128, 64]))
 eval_freq = 4100
 n_eval_episodes = 3
 learning_rate = 5e-4
-n_epochs = 10
+n_epochs = 30
 n_steps = 384  # 1408
 clip_range = 0.15
 clip_range_vf = 0.15
 total_timesteps = 55000
 visible = False
 info_keywords = tuple(['Typ1', 'Typ2', 'Typ3', 'Typ4', 'Typ5', 'Warteschlangen', 'Auslastung'])
+data = {'policy_kwargs': policy_kwargs, 'eval_freq': eval_freq, 'n_eval_episodes': n_eval_episodes,
+        'learning_rate': learning_rate, 'n_epochs': n_epochs, 'n_steps': n_steps, 'clip_range': clip_range,
+        'clip_range_vf': clip_range_vf, 'total_timesteps': total_timesteps}
+
+
+def lrsched():
+    def reallr(progress):
+        lr = learning_rate
+        if progress < 0.85:
+            lr = learning_rate * 0.8
+        if progress < 0.66:
+            lr = learning_rate * 0.6
+        if progress < 0.33:
+            lr = learning_rate * 0.4
+        return lr
+
+    return reallr
+
+
+def clipsched():
+    def realclip(progress):
+        clip = 0.3
+        if progress < 0.85:
+            clip = 0.2
+        if progress < 0.66:
+            clip = 0.15
+        if progress < 0.33:
+            clip = 0.1
+        return clip
+
+    return realclip
+
 
 for i in range(2):
     os.makedirs(Training['Logs'][i], exist_ok=True)
+    with open(Training['Logs'][i] + '\Settings.txt', "w") as datei:
+        # Die Werte in die Datei schreiben, einen pro Zeile
+        for name, wert in data.items():
+            datei.write(str(name) + ' = ' + str(wert) + "\n")
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell',
                         model=Training['Sim'][i], socket=None, visible=visible)
     env = Environment(plantsim)
@@ -66,9 +104,9 @@ for i in range(2):
                                  eval_freq=eval_freq,
                                  n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
 
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i], learning_rate=learning_rate,
-                n_epochs=n_epochs, clip_range=clip_range,
-                device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=clip_range_vf,
+    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i], learning_rate=lrsched(),
+                n_epochs=n_epochs, clip_range=clipsched(),
+                device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=clipsched(),
                 n_steps=n_steps, policy_kwargs=policy_kwargs)
 
     model.learn(total_timesteps=total_timesteps, callback=[rollout_callback, eval_callback],
@@ -91,6 +129,10 @@ for i in range(2):
 
 for i in range(2, 4):
     os.makedirs(Training['Logs'][i], exist_ok=True)
+    with open(Training['Logs'][i] + 'Settings.txt', "w") as datei:
+        # Die Werte in die Datei schreiben, einen pro Zeile
+        for name, wert in data.items():
+            datei.write(str(name) + ' = ' + str(wert) + "\n")
     plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell',
                         model=Training['Sim'][i], socket=None, visible=visible)
     env = Environment(plantsim)
@@ -102,9 +144,9 @@ for i in range(2, 4):
                                  n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
 
     model = RecurrentPPO("MlpLstmPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i],
-                         learning_rate=learning_rate, n_epochs=n_epochs,
-                         clip_range=clip_range,
-                         device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=clip_range_vf,
+                         learning_rate=lrsched(), n_epochs=n_epochs,
+                         clip_range=clipsched(),
+                         device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=clipsched(),
                          n_steps=n_steps, policy_kwargs=policy_kwargs)
 
     model.learn(total_timesteps=total_timesteps, callback=[rollout_callback, eval_callback],

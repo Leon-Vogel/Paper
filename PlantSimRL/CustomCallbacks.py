@@ -30,16 +30,14 @@ class CustomCallback(BaseCallback):
         # self.parent = None  # type: Optional[BaseCallback]
 
     def _on_step(self) -> bool:
-        if self.env.done:
-            print('Done Erfolg')
-            self.logger.record('Typ1',
-                               self.env.problem.plantsim.get_value("Bewertung[\"Typ1\",1]"))  # Tabelle für Metrik
-            self.logger.record('Typ2', self.env.problem.plantsim.get_value("Bewertung[\"Typ2\",1]"))
-            self.logger.record('Typ3', self.env.problem.plantsim.get_value("Bewertung[\"Typ3\",1]"))
-            self.logger.record('Typ4', self.env.problem.plantsim.get_value("Bewertung[\"Typ4\",1]"))
-            self.logger.record('Typ5', self.env.problem.plantsim.get_value("Bewertung[\"Typ5\",1]"))
-            self.logger.record('Warteschlangen', self.env.problem.plantsim.get_value("Bewertung[\"Warteschlangen\",1]"))
-            self.logger.record('Auslastung', self.env.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]"))
+        if self.locals['dones']:
+            self.logger.record('Dlz/Typ1', self.locals['infos'][0]['Typ1'])
+            self.logger.record('Dlz/Typ2', self.locals['infos'][0]['Typ2'])
+            self.logger.record('Dlz/Typ3', self.locals['infos'][0]['Typ3'])
+            self.logger.record('Dlz/Typ4', self.locals['infos'][0]['Typ4'])
+            self.logger.record('Dlz/Typ5', self.locals['infos'][0]['Typ5'])
+            self.logger.record('eval/Warteschlangen', self.locals['infos'][0]['Warteschlangen'])
+            self.logger.record('eval/Auslastung', self.locals['infos'][0]['Auslastung'])
         return True  # return False to stop the training early
 
     def _on_rollout_start(self) -> None:
