@@ -30,6 +30,16 @@ class CustomCallback(BaseCallback):
         # self.parent = None  # type: Optional[BaseCallback]
 
     def _on_step(self) -> bool:
+        if self.env.done:
+            print('Done Erfolg')
+            self.logger.record('Typ1',
+                               self.env.problem.plantsim.get_value("Bewertung[\"Typ1\",1]"))  # Tabelle für Metrik
+            self.logger.record('Typ2', self.env.problem.plantsim.get_value("Bewertung[\"Typ2\",1]"))
+            self.logger.record('Typ3', self.env.problem.plantsim.get_value("Bewertung[\"Typ3\",1]"))
+            self.logger.record('Typ4', self.env.problem.plantsim.get_value("Bewertung[\"Typ4\",1]"))
+            self.logger.record('Typ5', self.env.problem.plantsim.get_value("Bewertung[\"Typ5\",1]"))
+            self.logger.record('Warteschlangen', self.env.problem.plantsim.get_value("Bewertung[\"Warteschlangen\",1]"))
+            self.logger.record('Auslastung', self.env.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]"))
         return True  # return False to stop the training early
 
     def _on_rollout_start(self) -> None:

@@ -173,13 +173,22 @@ class Environment(gym.Env):
         self.reward = -1 * self.problem.get_reward(self.current_state)
         self.done = self.problem.is_goal_state(self.current_state)
         self.info = {}
+        if self.done:
+            print('Done Erfolg')
+            self.info['Typ1'] = self.problem.plantsim.get_value("Bewertung[\"Typ1\",1]")  # Tabelle für Metrik
+            self.info['Typ2'] = self.problem.plantsim.get_value("Bewertung[\"Typ2\",1]")
+            self.info['Typ3'] = self.problem.plantsim.get_value("Bewertung[\"Typ3\",1]")
+            self.info['Typ4'] = self.problem.plantsim.get_value("Bewertung[\"Typ4\",1]")
+            self.info['Typ5'] = self.problem.plantsim.get_value("Bewertung[\"Typ5\",1]")
+            self.info['Warteschlangen'] = self.problem.plantsim.get_value("Bewertung[\"Warteschlangen\",1]")
+            self.info['Auslastung'] = self.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]")
         '''print(self.new_observation)
         print('-- Return %.1f' % self.reward)
         print('-- done: '+ str(self.done))'''
         return self.new_observation, self.reward, self.done, self.info
 
     def reset(self):
-        if self.done:
+        '''if self.done:
             print('Done Erfolg')
             print('Typ1: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ1\",1]")))  # Tabelle für Metrik
             print('Typ2: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ2\",1]")))
@@ -187,7 +196,7 @@ class Environment(gym.Env):
             print('Typ4: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ4\",1]")))
             print('Typ5: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ5\",1]")))
             print('Evaluation Warteschlangen: ' + str(self.problem.plantsim.get_value("Bewertung[\"Warteschlangen\",1]")))
-            print('Evaluation Auslastung: ' + str(self.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]")))
+            print('Evaluation Auslastung: ' + str(self.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]")))'''
         self.problem.plantsim.execute_simtalk("reset")
         self.problem.plantsim.reset_simulation()
         self.problem.reset()

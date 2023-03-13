@@ -3,6 +3,48 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="\PlantSimRL\ergebnisse\PPO_LSTM_R1\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse\PPO_R1\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse\R_In_PPO\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse\R_In_PPO_LSTM\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse\R_Sp_PPO\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse\R_Sp_PPO_LSTM\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\PlantSimRL\tmp\PPO_sb3\logs\monitor.csv">
           <value>
             <Attribute>
