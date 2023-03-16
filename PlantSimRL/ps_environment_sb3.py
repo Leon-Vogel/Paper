@@ -150,6 +150,14 @@ class Environment(gym.Env):
             'Typ5': [33, 33, 35, 29, 26, 40, 33, 31, 36, 38],
             'Total': [300, 300, 300, 300, 300, 300, 300, 300, 300, 300]
         }
+        self.eval_plan = {
+            'Typ1': [95, 84, 95, 93, 90],
+            'Typ2': [88, 78, 73, 89, 85],
+            'Typ3': [50, 80, 59, 56, 65],
+            'Typ4': [32, 30, 42, 33, 35],
+            'Typ5': [35, 28, 31, 29, 25],
+            'Total': [300, 300, 300, 300, 300]
+        }
 
         if seed_value is not None:
             seed(seed_value)
@@ -182,12 +190,15 @@ class Environment(gym.Env):
             self.info['Typ5'] = self.problem.plantsim.get_value("Bewertung[\"Typ5\",1]")
             self.info['Warteschlangen'] = self.problem.plantsim.get_value("Bewertung[\"Warteschlangen\",1]")
             self.info['Auslastung'] = self.problem.plantsim.get_value("Bewertung[\"Auslastung\",1]")
+            self.info['Av_Warteschlangen'] = self.problem.plantsim.get_value("Bewertung[\"Av_Warteschlangen\",1]")
+            self.info['Av_Auslastung'] = self.problem.plantsim.get_value("Bewertung[\"Av_Auslastung\",1]")
+            self.info['Soll'] = self.problem.plantsim.get_value("Bewertung[\"Soll\",1]")
         '''print(self.new_observation)
         print('-- Return %.1f' % self.reward)
         print('-- done: '+ str(self.done))'''
         return self.new_observation, self.reward, self.done, self.info
 
-    def reset(self):
+    def reset(self, eval_mode=None, eval_step=None):
         '''if self.done:
             print('Done Erfolg')
             print('Typ1: ' + str(self.problem.plantsim.get_value("Bewertung[\"Typ1\",1]")))  # Tabelle für Metrik
@@ -201,13 +212,21 @@ class Environment(gym.Env):
         self.problem.plantsim.reset_simulation()
         self.problem.reset()
         # Plan schreiben
-        i = random.randint(0, 9)
-        self.problem.plantsim.set_value("Typ_Soll[\"Typ1\",1]", self.plan['Typ1'][i])
-        self.problem.plantsim.set_value("Typ_Soll[\"Typ2\",1]", self.plan['Typ2'][i])
-        self.problem.plantsim.set_value("Typ_Soll[\"Typ3\",1]", self.plan['Typ3'][i])
-        self.problem.plantsim.set_value("Typ_Soll[\"Typ4\",1]", self.plan['Typ4'][i])
-        self.problem.plantsim.set_value("Typ_Soll[\"Typ5\",1]", self.plan['Typ5'][i])
-        self.problem.plantsim.set_value("Typ_Soll[\"Total\",1]", self.plan['Total'][i])
+        if eval_mode:
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ1\",1]", self.eval_plan['Typ1'][eval_step])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ2\",1]", self.eval_plan['Typ2'][eval_step])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ3\",1]", self.eval_plan['Typ3'][eval_step])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ4\",1]", self.eval_plan['Typ4'][eval_step])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ5\",1]", self.eval_plan['Typ5'][eval_step])
+            self.problem.plantsim.set_value("Typ_Soll[\"Total\",1]", self.eval_plan['Total'][eval_step])
+        else:
+            i = random.randint(0, 9)
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ1\",1]", self.plan['Typ1'][i])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ2\",1]", self.plan['Typ2'][i])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ3\",1]", self.plan['Typ3'][i])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ4\",1]", self.plan['Typ4'][i])
+            self.problem.plantsim.set_value("Typ_Soll[\"Typ5\",1]", self.plan['Typ5'][i])
+            self.problem.plantsim.set_value("Typ_Soll[\"Total\",1]", self.plan['Total'][i])
         self.problem.plantsim.start_simulation()
         self.problem.plantsim.execute_simtalk("GetCurrentState")
         self.current_state = self.problem.get_current_state()

@@ -1,18 +1,17 @@
+import os
+import random
+from typing import Callable
+
+import numpy as np
+import torch as T
+from sb3_contrib import RecurrentPPO
+from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
+from stable_baselines3.common.monitor import Monitor
+
+from CustomCallbacks import CustomCallback
 from plantsim.plantsim import Plantsim
 from ps_environment_sb3 import Environment
-import numpy as np
-import os
-import torch as T
-from stable_baselines3 import PPO
-from sb3_contrib import RecurrentPPO
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common import logger
-from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
-from stable_baselines3.common.results_plotter import load_results, ts2xy
-from stable_baselines3.common.evaluation import evaluate_policy
-from torch.nn import functional as F
-from stable_baselines3.common.env_checker import check_env
-from CustomCallbacks import CustomCallback
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -21,16 +20,35 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 # pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-erg = 'ergebnisse\\'
-mod = 'models\\'
+erg = 'ergebnisse_Test1\\'
+mod = 'models_Test1\\'  # _V1
 Training = {
-    'Sim': [pfad + '\RL_Sim_20230314_inter.spp', pfad + '\RL_Sim_20230313_sparse.spp',
-            pfad + '\RL_Sim_20230314_inter.spp',
-            pfad + '\RL_Sim_20230313_sparse.spp'],
-    'Logs': [erg + 'R_In_PPO', erg + 'R_Sp_PPO', erg + 'R_In_PPO_LSTM', erg + 'R_Sp_PPO_LSTM'],
-    'Logname': ['128-64-32', '128-64-32', '128-64-32', '128-64-32'],
-    'Model': [mod + 'R_In_PPO', mod + 'R_Sp_PPO', mod + 'R_In_PPO_LSTM', mod + 'R_Sp_PPO_LSTM']
+    'Sim': [pfad + '\RL_Sim_V2_inter.spp', pfad + '\RL_Sim_V3_inter.spp',
+            pfad + '\RL_Sim_V5_sparse.spp'],
+    'Logs': [erg + 'R_V2_PPO', erg + 'R_V3_PPO', erg + 'R_V4_PPO'],
+    'Logname': ['512-256-128-128-64_1step_var0_1',
+                '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1'],
+    'Model': [mod + 'R_V2_PPO', mod + 'R_V3_PPO', mod + 'R_V4_PPO']
 }
+'''Training = {
+    'Sim': [pfad + '\RL_Sim_V0_inter.spp', pfad + '\RL_Sim_V1_inter.spp',
+            pfad + '\RL_Sim_V2_inter.spp', pfad + '\RL_Sim_V3_inter.spp',
+            pfad + '\RL_Sim_V5_sparse.spp'],
+    'Logs': [erg + 'R_V0_PPO', erg + 'R_V1_PPO', erg + 'R_V2_PPO', erg + 'R_V3_PPO', erg + 'R_V4_PPO'],
+    'Logname': ['512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1',
+                '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1'],
+    'Model': [mod + 'R_V0_PPO', mod + 'R_V1_PPO', mod + 'R_V2_PPO', mod + 'R_V3_PPO', mod + 'R_V4_PPO']
+}'''
+'''
+Training = {
+    'Sim': [pfad + '\RL_Sim_20230317_inter.spp', pfad + '\RL_Sim_20230317_sparse.spp',
+            pfad + '\RL_Sim_20230317_inter.spp',
+            pfad + '\RL_Sim_20230317_sparse.spp'],
+    'Logs': [erg + 'R_In_PPO', erg + 'R_Sp_PPO', erg + 'R_In_PPO_LSTM', erg + 'R_Sp_PPO_LSTM'],
+    'Logname': ['512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1',
+                '512-256-128-128-64_1step_var0_1'],
+    'Model': [mod + 'R_In_PPO', mod + 'R_Sp_PPO', mod + 'R_In_PPO_LSTM', mod + 'R_Sp_PPO_LSTM']
+}'''
 '''
 Training = {
     'Sim': [pfad + '\RL_Sim_20230310.spp', pfad + '\R2.spp', pfad + '\R3.spp', pfad + '\RL_Sim_20230310.spp',
@@ -41,56 +59,66 @@ Training = {
              mod + 'R3_PPO_LSTM'],
 }'''
 # os.makedirs(logs, exist_ok=True)
-# policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 256, 128, 64], vf=[256, 256, 128, 64]))
+policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[512, 256, 128, 64], vf=[512, 256, 128, 64]))
+# policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 128, 64, 32, 16], vf=[256, 128, 64, 32, 16]))
 # policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64]))
-policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[128, 64, 32], vf=[128, 64, 32]))
+# policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[128, 64, 32], vf=[128, 64, 32]))
 # policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[128, 64], vf=[128, 64]))
 eval_freq = 4100
 n_eval_episodes = 3
 learning_rate = 5e-4
-n_epochs = 30
-n_steps = 384  # 1408
+n_epochs = 15
+n_steps = 384  # 1024 384
 clip_range = 0.15
 clip_range_vf = 0.15
-total_timesteps = 55000
-visible = False
+total_timesteps = 60000
+visible = False  # False True
 info_keywords = tuple(['Typ1', 'Typ2', 'Typ3', 'Typ4', 'Typ5', 'Warteschlangen', 'Auslastung'])
 data = {'policy_kwargs': policy_kwargs, 'eval_freq': eval_freq, 'n_eval_episodes': n_eval_episodes,
         'learning_rate': learning_rate, 'n_epochs': n_epochs, 'n_steps': n_steps, 'clip_range': clip_range,
-        'clip_range_vf': clip_range_vf, 'total_timesteps': total_timesteps}
+        'clip_range_vf': clip_range_vf, 'total_timesteps': total_timesteps, 'Sim': Training['Sim']}
 
 
+# learning_rate-value
 def lrsched():
     def reallr(progress):
         lr = learning_rate
-        if progress < 0.85:
-            lr = learning_rate * 0.8
-        if progress < 0.66:
-            lr = learning_rate * 0.6
-        if progress < 0.33:
+        if progress < 0.5:
+            lr = learning_rate  # * 0.8
+        if progress < 0.3:
+            lr = learning_rate  # * 0.6
+        if progress < 0.1:
             lr = learning_rate * 0.4
         return lr
 
     return reallr
 
 
+def linear_schedule(initial_value: float) -> Callable[[float], float]:
+    def func(progress_remaining: float) -> float:
+        return progress_remaining * initial_value
+
+    return func
+
+
+# clip-value
 def clipsched():
     def realclip(progress):
-        clip = 0.3
+        clip = clip_range
         if progress < 0.85:
-            clip = 0.2
+            clip = clip_range
         if progress < 0.66:
-            clip = 0.15
+            clip = clip_range  # * 0.8
         if progress < 0.33:
-            clip = 0.1
+            clip = clip_range  # * 0.6
         return clip
 
     return realclip
 
 
-for i in range(2):
+for i in range(3):
     os.makedirs(Training['Logs'][i], exist_ok=True)
-    with open(Training['Logs'][i] + '\Settings.txt', "w") as datei:
+    with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
         # Die Werte in die Datei schreiben, einen pro Zeile
         for name, wert in data.items():
             datei.write(str(name) + ' = ' + str(wert) + "\n")
@@ -99,13 +127,13 @@ for i in range(2):
     env = Environment(plantsim)
     env = Monitor(env, Training['Logs'][i], info_keywords=info_keywords)
     rollout_callback = CustomCallback(env)
-    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=0, verbose=1)
+    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=1000, verbose=1)
     eval_callback = EvalCallback(eval_env=env, best_model_save_path=Training['Model'][i], log_path=Training['Logs'][i],
                                  eval_freq=eval_freq,
                                  n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
 
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i], learning_rate=lrsched(),
-                n_epochs=n_epochs, clip_range=clipsched(),
+                n_epochs=n_epochs, clip_range=clipsched(), gamma=0.995,
                 device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), clip_range_vf=clipsched(),
                 n_steps=n_steps, policy_kwargs=policy_kwargs)
 
@@ -120,16 +148,48 @@ for i in range(2):
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
     print(mean_reward)
     '''
-    obs = env.reset()
-    dones = False
-    while not dones:
-        action, _states = model.predict(obs)
-        obs, rewards, dones, info = env.step(action)
-    env.close()
 
+    # Eval von 5 Plänen die nicht teil vom Training sind & Eval Rand actions
+    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "w")
+    for j in range(5):
+        done = False
+        reward_sum = 0
+        steps = 0
+        info = {}
+        obs = env.reset(eval_mode=True, eval_step=j)
+        while not done:
+            steps += 1
+            action, _states = model.predict(obs)
+            obs, rewards, done, info = env.step(action)
+            reward_sum += rewards
+        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "a") as datei:
+            # Die Werte in die Datei schreiben, einen pro Zeile
+            datei.write('Steps = ' + str(steps) + "\n")
+            datei.write('Return = ' + str(reward_sum) + "\n")
+            datei.write('Info = ' + str(info) + "\n")
+    # Eval von Random Actions
+    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "w")
+    for j in range(5):
+        done = False
+        reward_sum = 0
+        steps = 0
+        info = {}
+        obs = env.reset(eval_mode=True, eval_step=j)
+        while not done:
+            steps += 1
+            action = random.randint(0, 4)
+            obs, rewards, done, info = env.step(action)
+            reward_sum += rewards
+        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "a") as datei:
+            # Die Werte in die Datei schreiben, einen pro Zeile
+            datei.write('Steps = ' + str(steps) + "\n")
+            datei.write('Return = ' + str(reward_sum) + "\n")
+            datei.write('Info = ' + str(info) + "\n")
+    env.close()
+'''
 for i in range(2, 4):
     os.makedirs(Training['Logs'][i], exist_ok=True)
-    with open(Training['Logs'][i] + 'Settings.txt', "w") as datei:
+    with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
         # Die Werte in die Datei schreiben, einen pro Zeile
         for name, wert in data.items():
             datei.write(str(name) + ' = ' + str(wert) + "\n")
@@ -157,9 +217,10 @@ for i in range(2, 4):
     # Evaluiere Agent, Ergebnisse Dokumentieren
     model = RecurrentPPO.load(Training['Model'][i] + '\\best_model', env)
     '''
-    mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
-    print(mean_reward)
-    '''
+    # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
+    # print(mean_reward)
+
+'''
     obs = env.reset()
     lstm_states = None
     num_envs = 1
@@ -171,3 +232,45 @@ for i in range(2, 4):
         obs, rewards, dones, info = env.step(action)
         episode_starts = dones
     env.close()
+
+
+    # Eval von 5 Plänen die nicht teil vom Training sind & Eval Rand actions
+    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "w")
+    for j in range(5):
+        done = False
+        reward_sum = 0
+        steps = 0
+        info = {}
+        obs = env.reset(eval_mode=True, eval_step=j)
+        lstm_states = None
+        episode_starts = np.ones((num_envs,), dtype=bool)
+        while not done:
+            steps += 1
+            action, lstm_states = model.predict(obs, state=lstm_states, episode_start=episode_starts,
+                                                deterministic=True)
+            obs, rewards, done, info = env.step(action)
+            episode_starts = done
+            reward_sum += rewards
+        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "a") as datei:
+            # Die Werte in die Datei schreiben, einen pro Zeile
+            datei.write('Steps = ' + str(steps) + "\n")
+            datei.write('Return = ' + str(reward_sum) + "\n")
+            datei.write('Info = ' + str(info) + "\n")
+    # Eval von Random Actions
+    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "w")
+    for j in range(5):
+        done = False
+        reward_sum = 0
+        steps = 0
+        info = {}
+        obs = env.reset(eval_mode=True, eval_step=j)
+        while not done:
+            steps += 1
+            action = random.randint(0, 4)
+            obs, rewards, done, info = env.step(action)
+            reward_sum += rewards
+        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "a") as datei:
+            # Die Werte in die Datei schreiben, einen pro Zeile
+            datei.write('Steps = ' + str(steps) + "\n")
+            datei.write('Return = ' + str(reward_sum) + "\n")
+            datei.write('Info = ' + str(info) + "\n")'''

@@ -36,8 +36,11 @@ class CustomCallback(BaseCallback):
             self.logger.record('Dlz/Typ3', self.locals['infos'][0]['Typ3'])
             self.logger.record('Dlz/Typ4', self.locals['infos'][0]['Typ4'])
             self.logger.record('Dlz/Typ5', self.locals['infos'][0]['Typ5'])
-            self.logger.record('eval/Warteschlangen', self.locals['infos'][0]['Warteschlangen'])
-            self.logger.record('eval/Auslastung', self.locals['infos'][0]['Auslastung'])
+            self.logger.record('Varianz/Warteschlangen', self.locals['infos'][0]['Warteschlangen'])
+            self.logger.record('Varianz/Auslastung', self.locals['infos'][0]['Auslastung'])
+            self.logger.record('Mittelwert/Warteschlangen', self.locals['infos'][0]['Av_Warteschlangen'])
+            self.logger.record('Mittelwert/Auslastung', self.locals['infos'][0]['Av_Auslastung'])
+            self.logger.record('Plan/Anteil_fertigeProdukte', self.locals['infos'][0]['Soll'])
         return True  # return False to stop the training early
 
     def _on_rollout_start(self) -> None:
