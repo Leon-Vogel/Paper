@@ -38,6 +38,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\PlantSimRL\ergebnisse_Test2\R_V00_PPO\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\PlantSimRL\tmp\PPO_sb3\logs\monitor.csv">
           <value>
             <Attribute>

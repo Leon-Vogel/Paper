@@ -1,0 +1,10 @@
+policy_kwargs = {'activation_fn': <class 'torch.nn.modules.activation.LeakyReLU'>, 'net_arch': {'pi': [128, 128, 64], 'vf': [128, 128, 64]}}
+eval_freq = 3100
+n_eval_episodes = 2
+learning_rate = 0.0005
+n_epochs = 10
+n_steps = 384
+clip_range = 0.15
+clip_range_vf = None
+total_timesteps = 75000
+Sim = ['D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V00_inter.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V1_inter.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V4_inter.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V5_inter.spp']
