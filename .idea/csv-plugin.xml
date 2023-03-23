@@ -45,6 +45,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\PlantSimRL\ergebnisse_Test3\R_V00_PPO\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse_Test3\R_V1_PPO\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\PlantSimRL\ergebnisse_Test3\R_V4_PPO_LSTM\monitor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\PlantSimRL\tmp\PPO_sb3\logs\monitor.csv">
           <value>
             <Attribute>
