@@ -16,7 +16,7 @@ minor = 3
 style = 'default'  # 'default' helvetica
 
 
-def ergebnisse(x, y, names=None, title='title'):
+def ergebnisse(x, y, names=None, title='title', yachse='Return', xachse='Episode'):
     # plt.style.use(style)
 
     plt.rcParams['text.usetex'] = True
@@ -66,18 +66,18 @@ def ergebnisse(x, y, names=None, title='title'):
 
     ax = plt.gca()
 
-    ax.xaxis.set_minor_locator(MultipleLocator(5))
-    ax.yaxis.set_minor_locator(MultipleLocator(10))
-    ax.set_xticklabels()
+    # ax.xaxis.set_minor_locator(MultipleLocator(5))
+    # ax.yaxis.set_minor_locator(MultipleLocator(10))
+    # ax.set_xticklabels()
     ax.legend(loc='lower right', prop={
         'family': 'Helvetica'})
-    plt.xlabel('Episode\ in\ Training', labelpad=10)
-    plt.ylabel('Return', labelpad=10)
+    plt.xlabel(xachse, labelpad=10)
+    plt.ylabel(yachse, labelpad=10)
     os.makedirs('plots', exist_ok=True)
-    plt.savefig('plots\plot_' + title + '.png', dpi=300, pad_inches=.1, bbox_inches='tight')
+    plt.savefig('plots\plot_' + title.strip() + '.png', dpi=300, pad_inches=.1, bbox_inches='tight')
 
 
-def ergebnis(x, y, name='test', title='title'):
+def ergebnis(x, y, name='test', title='title', yachse='Return', xachse='Episode'):
     # plt.style.use(style)
 
     N = len(y)
@@ -121,10 +121,10 @@ def ergebnis(x, y, name='test', title='title'):
     ax.yaxis.set_minor_locator(MultipleLocator(10))
     plt.legend(prop={
         'family': 'Comic Sans MS'})
-    plt.xlabel('$Episode\ in\ Training$', labelpad=10)
-    plt.ylabel('$Return$', labelpad=10)
+    plt.xlabel(xachse, labelpad=10)
+    plt.ylabel(yachse, labelpad=10)
     os.makedirs('plots', exist_ok=True)
-    plt.savefig('plots\plot_' + title + '.png', dpi=300, pad_inches=.1, bbox_inches='tight')
+    plt.savefig('plots\plot' + title.strip() + '.png', dpi=300, pad_inches=.1, bbox_inches='tight')
 
 
 pfad = 'ergebnisse_Test3'
@@ -141,7 +141,7 @@ F = ['\events.out.tfevents.1679086287.DESKTOP-6FHK9F7.19296.0',
 N = '\[128-128-64]_1step_var0_1_1'
 N_LSTM = ['\[128-128-64]_1step_var0_1_1', '\[128-128-64]_1step_var0_1_1', '\[128-128-64]_1step_var0_1_2',
           '\[128-128-64]_1step_var0_1_1']
-
+'''
 d = {}
 for event in summary_iterator(pfad + R[0] + N + F[0]):
     for value in event.summary.value:
@@ -158,23 +158,93 @@ for event in summary_iterator(pfad + R[0] + N + F[0]):
                 # print(value.simple_value)
 # print(d)
 df = pd.DataFrame.from_dict(d, orient='index')
-df = df.transpose()
+df = df.transpose()'''
 # print(df.keys())
 
 names = ['R00', 'R1', 'R4', 'R5']
 name = 'R00'
-title = 'Warteschlangen_PPO'
-
-x_rew = list(df['rollout/ep_rew_mean'].index.values)
+title = 'Return PPO'
+yachse = 'Return'
+'''x_rew = list(df['rollout/ep_rew_mean'].index.values)
 y_rew = df['rollout/ep_rew_mean'].to_list()
 
-ergebnis(x_rew, y_rew, name=name, title=title + '_single')
+ergebnis(x_rew, y_rew, name=name, title=title + '_single')'''
 
 x_rew = []
 y_rew = []
 for i in range(len(names)):
     d = {}
-    for event in summary_iterator(pfad + R[0+i] + N + F[0 + i]):  # _LSTM[i]
+    for event in summary_iterator(pfad + R[0+i] + N + F[0 + i]):
+        for value in event.summary.value:
+            # print(value.tag)
+            if value.HasField('simple_value'):
+                if value.tag in d.keys():
+                    d[value.tag].append(value.simple_value)
+                else:
+                    d.update({str(value.tag): [value.simple_value]})
+                    # print(value.simple_value)
+    # print(d)
+    df = pd.DataFrame.from_dict(d, orient='index')
+    df = df.transpose()
+
+    x_rew.append(list(df['rollout/ep_rew_mean'].index.values))
+    y_rew.append(df['rollout/ep_rew_mean'].to_list())
+
+ergebnisse(x_rew, y_rew, names=names, title=title, yachse=yachse)
+
+
+
+
+
+title = 'Durchlaufzeit PPO'
+yachse = 'Mittelwert Durchlaufzeit pro Produkt [s]'
+
+x_0 = []
+y_1 = []
+y_2 = []
+y_3 = []
+y_4 = []
+y_5 = []
+y_0 = []
+for i in range(len(names)):
+    d = {}
+    for event in summary_iterator(pfad + R[0+i] + N + F[0 + i]):
+        for value in event.summary.value:
+            # print(value.tag)
+            if value.HasField('simple_value'):
+                if value.tag in d.keys():
+                    d[value.tag].append(value.simple_value)
+                else:
+                    d.update({str(value.tag): [value.simple_value]})
+                    # print(value.simple_value)
+    # print(d)
+    df = pd.DataFrame.from_dict(d, orient='index')
+    df = df.transpose()
+
+    x_0.append(df['Dlz/Typ1'].index.values)
+    y_1 = (df['Dlz/Typ1'].to_list())
+    y_2 = (df['Dlz/Typ2'].to_list())
+    y_3 = (df['Dlz/Typ3'].to_list())
+    y_4 = (df['Dlz/Typ4'].to_list())
+    y_5 = (df['Dlz/Typ5'].to_list())
+    #  tmp = [(xv1 + xv2 + xv3 + xv4 + vx5) / 5 for xv1, xv2, xv3, xv4, vx5 in zip(*[x_1, x_2, x_3, x_4, x_5])]
+    tmp = np.array([y_1, y_2, y_3, y_4, y_5])
+    y_0.append(np.average(tmp, axis=0))
+
+ergebnisse(x_0, y_0, names=names, title=title, yachse=yachse)
+
+
+
+
+
+title = 'Warteschlangen PPO'
+yachse = 'Produkte pro Förderstrecke'
+
+x_rew = []
+y_rew = []
+for i in range(len(names)):
+    d = {}
+    for event in summary_iterator(pfad + R[0+i] + N + F[0 + i]):
         for value in event.summary.value:
             # print(value.tag)
             if value.HasField('simple_value'):
@@ -189,10 +259,8 @@ for i in range(len(names)):
 
     x_rew.append(list(df['Mittelwert/Warteschlangen'].index.values))
     y_rew.append(df['Mittelwert/Warteschlangen'].to_list())
-    #x_rew.append(list(df['rollout/ep_rew_mean'].index.values))
-    #y_rew.append(df['rollout/ep_rew_mean'].to_list())
 
-ergebnisse(x_rew, y_rew, names=names, title=title)
+ergebnisse(x_rew, y_rew, names=names, title=title, yachse=yachse)
 
 '''Index(['Dlz/Typ1', 'Dlz/Typ2', 'Dlz/Typ3', 'Dlz/Typ4', 'Dlz/Typ5',
        'Mittelwert/Auslastung', 'Mittelwert/Warteschlangen',
@@ -205,3 +273,97 @@ ergebnisse(x_rew, y_rew, names=names, title=title)
        'eval/mean_ep_length', 'eval/mean_reward'],
       dtype='object')
       '''
+title = 'Return PPO LSTM'
+yachse = 'Return'
+
+x_rew = []
+y_rew = []
+for i in range(len(names)):
+    d = {}
+    for event in summary_iterator(pfad + R[4+i] + N_LSTM[i] + F[4 + i]):
+        for value in event.summary.value:
+            # print(value.tag)
+            if value.HasField('simple_value'):
+                if value.tag in d.keys():
+                    d[value.tag].append(value.simple_value)
+                else:
+                    d.update({str(value.tag): [value.simple_value]})
+                    # print(value.simple_value)
+    # print(d)
+    df = pd.DataFrame.from_dict(d, orient='index')
+    df = df.transpose()
+
+    x_rew.append(list(df['rollout/ep_rew_mean'].index.values))
+    y_rew.append(df['rollout/ep_rew_mean'].to_list())
+
+ergebnisse(x_rew, y_rew, names=names, title=title)
+
+
+
+
+
+
+title = 'Durchlaufzeit PPO LSTM'
+yachse = 'Mittelwert Durchlaufzeit pro Produkt [s]'
+
+x_0 = []
+y_1 = []
+y_2 = []
+y_3 = []
+y_4 = []
+y_5 = []
+y_0 = []
+for i in range(len(names)):
+    d = {}
+    for event in summary_iterator(pfad + R[4+i] + N_LSTM[i] + F[4 + i]):
+        for value in event.summary.value:
+            # print(value.tag)
+            if value.HasField('simple_value'):
+                if value.tag in d.keys():
+                    d[value.tag].append(value.simple_value)
+                else:
+                    d.update({str(value.tag): [value.simple_value]})
+                    # print(value.simple_value)
+    # print(d)
+    df = pd.DataFrame.from_dict(d, orient='index')
+    df = df.transpose()
+
+    x_0.append(df['Dlz/Typ1'].index.values)
+    y_1 = (df['Dlz/Typ1'].to_list())
+    y_2 = (df['Dlz/Typ2'].to_list())
+    y_3 = (df['Dlz/Typ3'].to_list())
+    y_4 = (df['Dlz/Typ4'].to_list())
+    y_5 = (df['Dlz/Typ5'].to_list())
+    #  tmp = [(xv1 + xv2 + xv3 + xv4 + vx5) / 5 for xv1, xv2, xv3, xv4, vx5 in zip(*[x_1, x_2, x_3, x_4, x_5])]
+    tmp = np.array([y_1, y_2, y_3, y_4, y_5])
+    y_0.append(np.average(tmp, axis=0))
+
+ergebnisse(x_0, y_0, names=names, title=title, yachse=yachse)
+
+
+
+
+title = 'Warteschlangen PPO LSTM'
+yachse = 'Produkte pro Förderstrecke'
+
+x_rew = []
+y_rew = []
+for i in range(len(names)):
+    d = {}
+    for event in summary_iterator(pfad + R[4+i] + N_LSTM[i] + F[4 + i]):
+        for value in event.summary.value:
+            # print(value.tag)
+            if value.HasField('simple_value'):
+                if value.tag in d.keys():
+                    d[value.tag].append(value.simple_value)
+                else:
+                    d.update({str(value.tag): [value.simple_value]})
+                    # print(value.simple_value)
+    # print(d)
+    df = pd.DataFrame.from_dict(d, orient='index')
+    df = df.transpose()
+
+    x_rew.append(list(df['Mittelwert/Warteschlangen'].index.values))
+    y_rew.append(df['Mittelwert/Warteschlangen'].to_list())
+
+ergebnisse(x_rew, y_rew, names=names, title=title, yachse=yachse)
