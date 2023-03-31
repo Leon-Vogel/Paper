@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from collections import defaultdict
+import tensorboard as tb
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 
@@ -47,7 +48,12 @@ def get_file_path(dpath, tag):
         os.makedirs(folder_path)
     return os.path.join(folder_path, file_name)
 
-
+'''
 if __name__ == '__main__':
     path = 'ergebnisse_Test3\R_V00_PPO\[128-128-64]_1step_var0_1_1\\'  # \R_V00_PPO\[128-128-64]_1step_var0_1_1
     to_csv(path)
+'''
+experiment_id = "c1KCv3X3QvGwaXfgX1c4tg"
+experiment = tb.data.experimental.ExperimentFromDev(experiment_id)
+df = experiment.get_scalars()
+df
