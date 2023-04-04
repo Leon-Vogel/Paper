@@ -7,6 +7,7 @@ from scipy import stats
 from tensorflow.python.summary.summary_iterator import summary_iterator
 import tensorboard as tb
 from matplotlib.ticker import MultipleLocator
+from Paper_Utils_multiple import ergebnisse_return
 
 fsize = 10
 tsize = 10
@@ -16,7 +17,7 @@ minor = 3
 style = 'default'  # 'default' helvetica
 
 
-def ergebnisse(x, y, names=None, title='title', yachse='Return', xachse='Episode'):
+def ergebnis(x, y, names=None, title='title', yachse='Return', xachse='Episode', leg_pos='upper right'):
     # plt.style.use(style)
 
     plt.rcParams['text.usetex'] = True
@@ -46,9 +47,10 @@ def ergebnisse(x, y, names=None, title='title', yachse='Return', xachse='Episode
         for t in range(N):
             running_avg[i].append(np.mean(y[i][max(0, t - 30):(t + 1)]))
             # plt.scatter(x, y, s=3, label='PPO_LSTM')
-    x = np.asarray(x)
-    y = np.asarray(running_avg)
-    plt.plot(x.T, y.T, label=names)
+    x_1 = np.asarray(x)
+    y_1 = np.asarray(running_avg)
+    plt.plot(x_1[0], y_1[0], label=names[0], color='tab:blue')
+    plt.plot(x_1[1], y_1[1], label=names[1], color='tab:orange')
     # R1 = pd.Series(data=running_avg[0], index=x[0])
     # R2 = pd.Series(data=running_avg[1], index=x[1])
     # plt.plot(R1, label=names[0])
@@ -69,15 +71,16 @@ def ergebnisse(x, y, names=None, title='title', yachse='Return', xachse='Episode
     # ax.xaxis.set_minor_locator(MultipleLocator(5))
     # ax.yaxis.set_minor_locator(MultipleLocator(10))
     # ax.set_xticklabels()
-    ax.legend(loc='lower right', prop={
+    ax.legend(loc=leg_pos, prop={
         'family': 'Helvetica'})
     plt.xlabel(xachse, labelpad=10)
     plt.ylabel(yachse, labelpad=10)
     os.makedirs('plots', exist_ok=True)
-    plt.savefig('plots\plot_' + title.strip() + '.png', dpi=300, pad_inches=.1, bbox_inches='tight')
+    plt.savefig('plots\single_' + title.strip() + '.png', dpi=300, pad_inches=.1, bbox_inches='tight')
 
 
-def ergebnis(x1, y1, x2, y2, names=['test'], title='title', yachse='Return', xachse='Episode', leg_pos='upper right'):
+def ergebnisse(x1, y1, x2, y2, names=['test'], title='title', yachse='Return', xachse='Episode', leg_pos='upper right',
+               auto_ylim=False):
     plt.rcParams['text.usetex'] = True
     plt.rcParams['font.size'] = fsize
     plt.rcParams['font.family'] = 'Helvetica'
@@ -120,28 +123,33 @@ def ergebnis(x1, y1, x2, y2, names=['test'], title='title', yachse='Return', xac
     x_2 = np.asarray(x2)
     y_2 = np.asarray(running_avg2)
 
-    ax1.plot(x_1[0], y_1[0], label=names[0], color='tab:orange')
-    ax1.plot(x_1[1], y_1[1], label=names[1], color='tab:blue')
-    ax1.plot(x_1[2], y_1[2], label=names[2], color='tab:green')
-    ax1.plot(x_1[3], y_1[3], label=names[3], color='tab:red')
-    #ax1.plot(x_1.T, y_1.T, label=names)
+    ax1.plot(x_1[0], y_1[0], label=names[0], color='tab:blue')
+    ax1.plot(x_1[1], y_1[1], label=names[1], color='tab:orange')
+    if len(x_1) > 2:
+        ax1.plot(x_1[2], y_1[2], label=names[2], color='tab:green')
+        ax1.plot(x_1[3], y_1[3], label=names[3], color='tab:red')
+    # ax1.plot(x_1.T, y_1.T, label=names)
     ax1.tick_params(axis='y')
     ax1.set_xlabel(xachse, labelpad=10)
     ax1.set_ylabel(yachse, labelpad=10)
-    ax1.set_ylim(ymin=0, ymax=7500)
-    # ax1.set_xlim(xmin=0, xmax=76000)
-    ax1.yaxis.set_major_locator(MultipleLocator(1000))
+    if not auto_ylim:
+        ax1.set_ylim(ymin=0, ymax=7500)
+        # ax1.set_xlim(xmin=0, xmax=76000)
+        ax1.yaxis.set_major_locator(MultipleLocator(1000))
 
     ax2 = ax1.twinx()
     color = 'tab:blue'
     ax2.set_ylabel('Plan Erfüllung')  # we already handled the x-label with ax1
 
-    ax2.plot(x_2[0], y_2[0], label=names[0], color='tab:orange', linestyle='--', alpha=0.7)
-    ax2.plot(x_2[1], y_2[1], label=names[1], color='tab:blue', linestyle='--', alpha=0.7)
-    ax2.plot(x_2[2], y_2[2], label=names[2], color='tab:green', linestyle='--', alpha=0.7)
-    ax2.plot(x_2[3], y_2[3], label=names[3], color='tab:red', linestyle='--', alpha=0.7)
-    #ax2.plot(x_2.T, y_2.T, label=names, linestyle='--', alpha=0.7)
+    ax2.plot(x_2[0], y_2[0], label=names[0], color='tab:blue', linestyle='--', alpha=0.7)
+    ax2.plot(x_2[1], y_2[1], label=names[1], color='tab:orange', linestyle='--', alpha=0.7)
+    if len(x_2) > 2:
+        ax2.plot(x_2[2], y_2[2], label=names[2], color='tab:green', linestyle='--', alpha=0.7)
+        ax2.plot(x_2[3], y_2[3], label=names[3], color='tab:red', linestyle='--', alpha=0.7)
+    # ax2.plot(x_2.T, y_2.T, label=names, linestyle='--', alpha=0.7)
     ax2.tick_params(axis='y')
+    if not auto_ylim:
+        ax2.set_ylim(ymin=0.7, ymax=1)
     ax1.legend(loc=leg_pos, prop={
         'family': 'Helvetica'}, ncol=2)
     # ax2.yaxis.tick_right()
@@ -204,6 +212,10 @@ yachse = 'Durchlaufzeit [s]'
 x_0 = []
 y_0 = []
 y_1 = []
+x_return_ppo = []
+y_return_ppo = []
+x_schl_ppo = []
+y_schl_ppo = []
 df_total = pd.DataFrame()
 for i in range(len(names)):
     d = []  # {}
@@ -219,97 +231,117 @@ for i in range(len(names)):
             df = pd.DataFrame(d)
             df_total = pd.concat([df_total, df], ignore_index=False, sort=False)
 
-
-df_total.to_excel(title + "_Dlz.xlsx")
+# df_total.to_excel(title + "_Dlz.xlsx")
 df_pivot = pd.pivot_table(df_total, values='Value', index=['Run', 'Step'], columns=['Tag'])
-df_pivot.to_excel(title + "_Dlz_pivot.xlsx")
+# df_pivot.to_excel(title + "_Dlz_pivot.xlsx")
 
-df_pivot = df_pivot[df_pivot['Dlz/Typ1'].notnull()]
+df_pivot_tmp = df_pivot[df_pivot['Dlz/Typ1'].notnull()]
+df_pivot_ret = df_pivot[df_pivot['rollout/ep_rew_mean'].notnull()]
+df_pivot_sch = df_pivot[df_pivot['Mittelwert/Warteschlangen'].notnull()]
 for i in range(len(names)):
-    y_0.append(df_pivot.loc[(names[i])][['Dlz/Typ1', 'Dlz/Typ2', 'Dlz/Typ3', 'Dlz/Typ4',
-                                         'Dlz/Typ5']].mean(axis=1).to_list())
-    y_1.append(df_pivot.loc[(names[i])]['Plan/Anteil_fertigeProdukte'].to_list())
-    x_0.append(df_pivot.loc[(names[i])]['Dlz/Typ1'].index.values.tolist())
+    y_0.append(df_pivot_tmp.loc[(names[i])][['Dlz/Typ1', 'Dlz/Typ2', 'Dlz/Typ3', 'Dlz/Typ4',
+                                             'Dlz/Typ5']].mean(axis=1).to_list())
+    y_1.append(df_pivot_tmp.loc[(names[i])]['Plan/Anteil_fertigeProdukte'].to_list())
+    x_0.append(df_pivot_tmp.loc[(names[i])]['Dlz/Typ1'].index.values.tolist())
+    y_return_ppo.append(df_pivot_ret.loc[(names[i])]['rollout/ep_rew_mean'].to_list())
+    x_return_ppo.append(df_pivot_ret.loc[(names[i])]['rollout/ep_rew_mean'].index.values.tolist())
+    y_schl_ppo.append(df_pivot_sch.loc[(names[i])]['Mittelwert/Warteschlangen'].to_list())
+    x_schl_ppo.append(df_pivot_sch.loc[(names[i])]['Mittelwert/Warteschlangen'].index.values.tolist())
 
-ergebnis(x_0, y_0, x_0, y_1, names=names, title=title, yachse=yachse, xachse='Step', leg_pos='upper left')
-
-x_rew2 = []
-y_rew2 = []
-for i in range(len(names)):
-    d = {}
-    for event in summary_iterator(pfad + R[0 + i] + N + F[0 + i]):
-        for value in event.summary.value:
-            # print(value.tag)
-            if value.HasField('simple_value'):
-                if value.tag in d.keys():
-                    d[value.tag].append(value.simple_value)
-                else:
-                    d.update({str(value.tag): [value.simple_value]})
-                    # print(value.simple_value)
-    # print(d)
-    df = pd.DataFrame.from_dict(d, orient='index')
-    df = df.transpose()
-
-    if i == 1:
-        df.to_excel(title + "_Plan.xlsx")
-
-    x_rew2.append(list(df['Plan/Anteil_fertigeProdukte'].index.values))
-    y_rew2.append(df['Plan/Anteil_fertigeProdukte'].to_list())
-
-ergebnis(x_0, y_0, x_rew2, y_rew2, names=names, title=title, yachse=yachse, leg_pos='upper left')
+ergebnisse(x_0, y_0, x_0, y_1, names=names, title=title, yachse=yachse, xachse='Step', leg_pos='upper left')
 
 title = 'PPO LSTM'
 yachse = 'Durchlaufzeit [s]'
 x_0 = []
-y_1 = []
-y_2 = []
-y_3 = []
-y_4 = []
-y_5 = []
 y_0 = []
+y_1 = []
+x_return_lstm = []
+y_return_lstm = []
+x_schl_lstm = []
+y_schl_lstm = []
+df_total = pd.DataFrame()
 for i in range(len(names)):
-    d = {}
+    d = []  # {}
     for event in summary_iterator(pfad + R[4 + i] + N_LSTM[i] + F[4 + i]):
+        d = []
         for value in event.summary.value:
-            # print(value.tag)
-            if value.HasField('simple_value'):
-                if value.tag in d.keys():
-                    d[value.tag].append(value.simple_value)
-                else:
-                    d.update({str(value.tag): [value.simple_value]})
-                    # print(value.simple_value)
-    # print(d)
-    df = pd.DataFrame.from_dict(d, orient='index')
-    df = df.transpose()
+            if value.HasField('simple_value') and event.step is not None:
+                # d.append({'Run': names[i], 'Step': event.step, 'Tag': value.tag, 'Value': value.simple_value})
+                d.append({'Run': names[i], 'Step': event.step, 'Tag': value.tag, 'Value': value.simple_value})
 
-    x_0.append(df['Dlz/Typ1'].index.values)
-    y_1 = (df['Dlz/Typ1'].to_list())
-    y_2 = (df['Dlz/Typ2'].to_list())
-    y_3 = (df['Dlz/Typ3'].to_list())
-    y_4 = (df['Dlz/Typ4'].to_list())
-    y_5 = (df['Dlz/Typ5'].to_list())
-    #  tmp = [(xv1 + xv2 + xv3 + xv4 + vx5) / 5 for xv1, xv2, xv3, xv4, vx5 in zip(*[x_1, x_2, x_3, x_4, x_5])]
-    tmp = np.array([y_1, y_2, y_3, y_4, y_5])
-    y_0.append(np.average(tmp, axis=0))
+        # print(value.simple_value)
+        if len(d) > 0:
+            df = pd.DataFrame(d)
+            df_total = pd.concat([df_total, df], ignore_index=False, sort=False)
 
-x_rew2 = []
-y_rew2 = []
+# df_total.to_excel(title + "_Dlz.xlsx")
+df_pivot = pd.pivot_table(df_total, values='Value', index=['Run', 'Step'], columns=['Tag'])
+# df_pivot.to_excel(title + "_Dlz_pivot.xlsx")
+
+df_pivot_tmp = df_pivot[df_pivot['Dlz/Typ1'].notnull()]
+df_pivot_ret = df_pivot[df_pivot['rollout/ep_rew_mean'].notnull()]
+df_pivot_sch = df_pivot[df_pivot['Mittelwert/Warteschlangen'].notnull()]
 for i in range(len(names)):
-    d = {}
-    for event in summary_iterator(pfad + R[4 + i] + N_LSTM[i] + F[4 + i]):
+    y_0.append(df_pivot_tmp.loc[(names[i])][['Dlz/Typ1', 'Dlz/Typ2', 'Dlz/Typ3', 'Dlz/Typ4',
+                                             'Dlz/Typ5']].mean(axis=1).to_list())
+    y_1.append(df_pivot_tmp.loc[(names[i])]['Plan/Anteil_fertigeProdukte'].to_list())
+    x_0.append(df_pivot_tmp.loc[(names[i])]['Dlz/Typ1'].index.values.tolist())
+    y_return_lstm.append(df_pivot_ret.loc[(names[i])]['rollout/ep_rew_mean'].to_list())
+    x_return_lstm.append(df_pivot_ret.loc[(names[i])]['rollout/ep_rew_mean'].index.values.tolist())
+    y_schl_lstm.append(df_pivot_sch.loc[(names[i])]['Mittelwert/Warteschlangen'].to_list())
+    x_schl_lstm.append(df_pivot_sch.loc[(names[i])]['Mittelwert/Warteschlangen'].index.values.tolist())
+
+ergebnisse(x_0, y_0, x_0, y_1, names=names, title=title, yachse=yachse, xachse='Step', leg_pos='upper left')
+
+title = 'Return'
+yachse = 'Return'
+ergebnisse_return(x_return_ppo, y_return_ppo, x_return_lstm, y_return_lstm, names=names, title=title,
+                  yachse=yachse, leg_pos='lower right')
+
+title = 'Warteschlangen'
+yachse = 'Produkte pro Förderstrecke'
+ergebnisse_return(x_schl_ppo, y_schl_ppo, x_schl_lstm, y_schl_lstm, names=names, title=title,
+                  yachse=yachse, leg_pos='upper right')
+
+pfad = 'ergebnisse_Test1'
+R = ['\R_V2_PPO', '\R_V1_PPO']
+F = ['\events.out.tfevents.1678959333.DESKTOP-6FHK9F7.17876.0',
+     '\events.out.tfevents.1678928371.DESKTOP-6FHK9F7.6944.1']
+N = '\\512-256-128-128-64_1step_var0_1_2'
+
+name_spa = ['R0', 'R2']
+title = 'Dense und Sparse Reward'
+yachse = 'Return'
+x_0 = []
+y_0 = []
+x_1 = []
+y_1 = []
+df_total = pd.DataFrame()
+for i in range(len(name_spa)):
+    d = []  # {}
+    for event in summary_iterator(pfad + R[0 + i] + N + F[0 + i]):
+        d = []
         for value in event.summary.value:
-            # print(value.tag)
-            if value.HasField('simple_value'):
-                if value.tag in d.keys():
-                    d[value.tag].append(value.simple_value)
-                else:
-                    d.update({str(value.tag): [value.simple_value]})
-                    # print(value.simple_value)
-    # print(d)
-    df = pd.DataFrame.from_dict(d, orient='index')
-    df = df.transpose()
+            if value.HasField('simple_value') and event.step is not None:
+                # d.append({'Run': names[i], 'Step': event.step, 'Tag': value.tag, 'Value': value.simple_value})
+                d.append({'Run': name_spa[i], 'Step': event.step, 'Tag': value.tag, 'Value': value.simple_value})
 
-    x_rew2.append(list(df['Plan/Anteil_fertigeProdukte'].index.values))
-    y_rew2.append(df['Plan/Anteil_fertigeProdukte'].to_list())
+        # print(value.simple_value)
+        if len(d) > 0:
+            df = pd.DataFrame(d)
+            df_total = pd.concat([df_total, df], ignore_index=False, sort=False)
 
-ergebnis(x_0, y_0, x_rew2, y_rew2, names=names, title=title, yachse=yachse, leg_pos='upper left')
+# df_total.to_excel(title + "_Dlz.xlsx")
+df_pivot = pd.pivot_table(df_total, values='Value', index=['Run', 'Step'], columns=['Tag'])
+# df_pivot.to_excel(title + "_Dlz_pivot.xlsx")
+
+df_pivot_tmp = df_pivot[df_pivot['Plan/Anteil_fertigeProdukte'].notnull()]
+df_pivot_ret = df_pivot[df_pivot['rollout/ep_rew_mean'].notnull()]
+for i in range(len(name_spa)):
+    y_0.append(df_pivot_ret.loc[(name_spa[i])]['rollout/ep_rew_mean'].to_list())
+    x_0.append(df_pivot_ret.loc[(name_spa[i])]['rollout/ep_rew_mean'].index.values.tolist())
+    y_1.append(df_pivot_tmp.loc[(name_spa[i])]['Plan/Anteil_fertigeProdukte'].to_list())
+    x_1.append(df_pivot_tmp.loc[(name_spa[i])]['Plan/Anteil_fertigeProdukte'].index.values.tolist())
+
+ergebnisse(x_0, y_0, x_1, y_1, names=name_spa, title=title, yachse=yachse, xachse='Step', leg_pos='upper left',
+           auto_ylim=True)

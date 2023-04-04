@@ -16,7 +16,7 @@ minor = 3
 style = 'default'  # 'default' helvetica
 
 
-def ergebnisse(x1, y1, x2, y2, names=None, title='title', yachse='Return', xachse='Episode', leg_pos='upper right'):
+def ergebnisse_return(x1, y1, x2, y2, names=None, title='title', yachse='Return', xachse='Step', leg_pos='upper right'):
     # plt.style.use(style)
 
     plt.rcParams['text.usetex'] = True
@@ -59,13 +59,20 @@ def ergebnisse(x1, y1, x2, y2, names=None, title='title', yachse='Return', xachs
             # plt.scatter(x, y, s=3, label='PPO_LSTM')
     x_1 = np.asarray(x1)
     y_1 = np.asarray(running_avg1)
-    ax1.plot(x_1.T, y_1.T, label=names)
+    ax1.plot(x_1[0], y_1[0], label=names[0], color='tab:blue')
+    ax1.plot(x_1[1], y_1[1], label=names[1], color='tab:orange')
+    ax1.plot(x_1[2], y_1[2], label=names[2], color='tab:green')
+    ax1.plot(x_1[3], y_1[3], label=names[3], color='tab:red')
     ax1.set_xlabel(xachse, labelpad=10)
     ax1.set_ylabel(yachse, labelpad=10)
     x_2 = np.asarray(x2)
     y_2 = np.asarray(running_avg2)
     ax2.axes.sharey(ax1)
-    ax2.plot(x_2.T, y_2.T, label=names)
+    ax2.plot(x_2[0], y_2[0], label=names[0], color='tab:blue')
+    ax2.plot(x_2[1], y_2[1], label=names[1], color='tab:orange')
+    ax2.plot(x_2[2], y_2[2], label=names[2], color='tab:green')
+    ax2.plot(x_2[3], y_2[3], label=names[3], color='tab:red')
+
     ax2.sharex(ax1)
     ax2.set_xlabel(xachse, labelpad=10)
     # ax = plt.gca()
@@ -157,7 +164,7 @@ for i in range(len(names)):
     x_rew2.append(list(df['rollout/ep_rew_mean'].index.values))
     y_rew2.append(df['rollout/ep_rew_mean'].to_list())
 
-ergebnisse(x_rew1, y_rew1, x_rew2, y_rew2, names=names, title=title, yachse=yachse, leg_pos='lower right')
+ergebnisse_return(x_rew1, y_rew1, x_rew2, y_rew2, names=names, title=title, yachse=yachse, leg_pos='lower right')
 
 
 
@@ -209,7 +216,7 @@ for i in range(len(names)):
     x_rew2.append(list(df['Mittelwert/Warteschlangen'].index.values))
     y_rew2.append(df['Mittelwert/Warteschlangen'].to_list())
 
-ergebnisse(x_rew1, y_rew1, x_rew2, y_rew2, names=names, title=title, yachse=yachse, leg_pos='upper right')
+ergebnisse_return(x_rew1, y_rew1, x_rew2, y_rew2, names=names, title=title, yachse=yachse, leg_pos='upper right')
 
 
 
@@ -286,7 +293,7 @@ for i in range(len(names)):
     tmp = np.array([y2_1, y2_2, y2_3, y2_4, y2_5])
     y2_0.append(np.average(tmp, axis=0))
 
-ergebnisse(x1_0, y1_0, x2_0, y2_0, names=names, title=title, yachse=yachse, leg_pos='upper right')
+ergebnisse_return(x1_0, y1_0, x2_0, y2_0, names=names, title=title, yachse=yachse, leg_pos='upper right')
 
 
 
