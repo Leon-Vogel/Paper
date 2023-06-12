@@ -175,7 +175,8 @@ N = '\[128-128-64]_1step_var0_1_1'
 N_LSTM = ['\[128-128-64]_1step_var0_1_1', '\[128-128-64]_1step_var0_1_1', '\[128-128-64]_1step_var0_1_2',
           '\[128-128-64]_1step_var0_1_1']
 
-names = ['R1', 'R2', 'R3', 'R4']
+names = ['$R_1$', '$R_2$', '$R_3$', '$R_4$']
+# names = ['R1', 'R2', 'R3', 'R4']
 name = 'R00'
 title = 'Return PPO'
 yachse = 'Return'
@@ -309,7 +310,8 @@ F = ['\events.out.tfevents.1678959333.DESKTOP-6FHK9F7.17876.0',
      '\events.out.tfevents.1678928371.DESKTOP-6FHK9F7.6944.1']
 N = '\\512-256-128-128-64_1step_var0_1_2'
 
-name_spa = ['R0', 'R2']
+name_spa = ['$R_0$', '$R_2$']
+# name_spa = ['R0', 'R2']
 title = 'Dense und Sparse Reward'
 yachse = 'Return'
 x_0 = []

@@ -119,7 +119,7 @@ df = pd.DataFrame.from_dict(d, orient='index')
 df = df.transpose()'''
 # print(df.keys())
 
-names = ['R1', 'R2', 'R3', 'R4']
+names = ['$R_1$', '$R_2$', '$R_3$', '$R_4$']
 name = 'R00'
 title = 'Return'
 yachse = 'Return'
