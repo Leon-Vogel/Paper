@@ -6,8 +6,11 @@ import numpy as np
 import torch as T
 from sb3_contrib import RecurrentPPO
 from stable_baselines3 import PPO
+from sb3_contrib import MaskablePPO
+from sb3_contrib.common.envs import InvalidActionEnvDiscrete
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.monitor import Monitor
+from sb3_contrib.common.maskable.utils import get_action_masks
 
 from CustomCallbacks import CustomCallback
 from plantsim.plantsim import Plantsim
@@ -20,8 +23,8 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 # pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-erg = 'ergebnisse_ent_coef\\'
-mod = 'models_ent_coef\\'  # _V1
+erg = 'ergebnisse_Mask\\'
+mod = 'models_Mask\\'  # _V1
 net_arch = dict(pi=[256, 256, 128, 64], vf=[256, 256, 128, 64])
 Training = {
     'Sim': [pfad + '\RL_Sim_V00_inter.spp', pfad + '\RL_Sim_V1_inter.spp',
@@ -82,8 +85,8 @@ n_epochs = 10
 n_steps = 384  # 1024 384
 clip_range = 0.15
 clip_range_vf = None
-total_timesteps = 7500
-visible = False  # False True
+total_timesteps = 75000
+visible = True  # False True
 info_keywords = tuple(['Typ1', 'Typ2', 'Typ3', 'Typ4', 'Typ5', 'Warteschlangen', 'Auslastung'])
 data = {'policy_kwargs': policy_kwargs, 'eval_freq': eval_freq, 'n_eval_episodes': n_eval_episodes,
         'learning_rate': learning_rate, 'n_epochs': n_epochs, 'n_steps': n_steps, 'clip_range': clip_range,
@@ -128,80 +131,8 @@ def clipsched():
 
 
 for i in range(sim_count):  # sim_count
-    os.makedirs(Training['Logs'][i], exist_ok=True)
-    with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
-        # Die Werte in die Datei schreiben, einen pro Zeile
-        for name, wert in data.items():
-            datei.write(str(name) + ' = ' + str(wert) + "\n")
-    plantsim = Plantsim(version='22.1', license_type='Educational', path_context='.Modelle.Modell',
-                        model=Training['Sim'][i], socket=None, visible=visible)
-    env = Environment(plantsim)
-    env = Monitor(env, Training['Logs'][i], info_keywords=info_keywords)
-    rollout_callback = CustomCallback(env)
-    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=1000, verbose=1)
-    eval_callback = EvalCallback(eval_env=env, best_model_save_path=Training['Model'][i], log_path=Training['Logs'][i],
-                                 eval_freq=eval_freq,
-                                 n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
-
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i],
-                learning_rate=linear_schedule(learning_rate),
-                n_epochs=n_epochs, clip_range=linear_schedule(clip_range), ent_coef=0.01,
-                device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
-                clip_range_vf=clip_range_vf,
-                n_steps=n_steps, policy_kwargs=policy_kwargs)
-
-    model.learn(total_timesteps=total_timesteps, callback=[rollout_callback, eval_callback],
-                tb_log_name=Training['Logname'][i], progress_bar=True)
-    model.save(Training['Model'][i] + '\\train_model')
-    del model
-
-    # Evaluiere Agent, Ergebnisse Dokumentieren
-    model = PPO.load(Training['Model'][i] + '\\best_model', env)
-
-    # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
-    # print(mean_reward)
-
-    # Eval von 5 Plänen die nicht teil vom Training sind & Eval Rand actions
-    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "w")
-    for j in range(5):
-        done = False
-        reward_sum = 0
-        steps = 0
-        info = {}
-        obs = env.reset(eval_mode=True, eval_step=j)
-        while not done:
-            steps += 1
-            action, _states = model.predict(obs)
-            obs, rewards, done, info = env.step(action)
-            reward_sum += rewards
-        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "a") as datei:
-            # Die Werte in die Datei schreiben, einen pro Zeile
-            datei.write('Steps = ' + str(steps) + "\n")
-            datei.write('Return = ' + str(reward_sum) + "\n")
-            datei.write('Info = ' + str(info) + "\n")
-    # Eval von Random Actions
-    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "w")
-    for j in range(5):
-        done = False
-        reward_sum = 0
-        steps = 0
-        info = {}
-        obs = env.reset(eval_mode=True, eval_step=j)
-        while not done:
-            steps += 1
-            action = random.randint(0, 4)
-            obs, rewards, done, info = env.step(action)
-            reward_sum += rewards
-        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "a") as datei:
-            # Die Werte in die Datei schreiben, einen pro Zeile
-            datei.write('Steps = ' + str(steps) + "\n")
-            datei.write('Return = ' + str(reward_sum) + "\n")
-            datei.write('Info = ' + str(info) + "\n")
-    env.close()
-
-for i in range(sim_count):  # sim_count
-    os.makedirs(Training['Logs'][i] + '_LSTM', exist_ok=True)
-    with open(Training['Logs'][i] + '_LSTM' + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
+    os.makedirs(Training['Logs'][i] + '_Mask', exist_ok=True)
+    with open(Training['Logs'][i] + '_Mask' + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
         # Die Werte in die Datei schreiben, einen pro Zeile
         for name, wert in data.items():
             datei.write(str(name) + ' = ' + str(wert) + "\n")
@@ -209,6 +140,7 @@ for i in range(sim_count):  # sim_count
                         model=Training['Sim'][i], socket=None, visible=visible)
     env = Environment(plantsim)
     env = Monitor(env, Training['Logs'][i] + '_LSTM', info_keywords=info_keywords)
+    env = InvalidActionEnvDiscrete(dim=5, n_invalid_actions=4)
     rollout_callback = CustomCallback(env)
     stop_callback = StopTrainingOnRewardThreshold(reward_threshold=1000, verbose=1)
     eval_callback = EvalCallback(eval_env=env, best_model_save_path=Training['Model'][i] + '_LSTM',
@@ -216,20 +148,20 @@ for i in range(sim_count):  # sim_count
                                  eval_freq=eval_freq,
                                  n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
 
-    model = RecurrentPPO("MlpLstmPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i] + '_LSTM',
+    model = MaskablePPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i] + '_LSTM',
                          learning_rate=linear_schedule(learning_rate), n_epochs=n_epochs,
                          clip_range=linear_schedule(clip_range),
-                         device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'), ent_coef=0.01,
+                         device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
                          clip_range_vf=clip_range_vf,
                          n_steps=n_steps, policy_kwargs=policy_kwargs)
 
     model.learn(total_timesteps=total_timesteps, callback=[rollout_callback, eval_callback],
                 tb_log_name=Training['Logname'][i], progress_bar=True)
-    model.save(Training['Model'][i] + '_LSTM' + '\\train_model')
+    model.save(Training['Model'][i] + '_Mask' + '\\train_model')
     del model
 
     # Evaluiere Agent, Ergebnisse Dokumentieren
-    model = RecurrentPPO.load(Training['Model'][i] + '_LSTM' + '\\best_model', env)
+    model = MaskablePPO.load(Training['Model'][i] + '_Mask' + '\\best_model', env)
     '''
     # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
     # print(mean_reward)
