@@ -20,7 +20,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 # pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-erg = 'ergebnisse_Test5\\'
+erg = 'ergebnisse_Test6\\'
 mod = 'models_Test3\\'  # _V1
 net_arch = dict(pi=[256, 256, 128, 64], vf=[256, 256, 128, 64])
 Training = {
@@ -127,7 +127,7 @@ def clipsched():
     return realclip
 
 
-for i in range(sim_count):  # sim_count
+'''for i in range(sim_count):  # sim_count  # 
     os.makedirs(Training['Logs'][i], exist_ok=True)
     with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
         # Die Werte in die Datei schreiben, einen pro Zeile
@@ -143,20 +143,20 @@ for i in range(sim_count):  # sim_count
                                  eval_freq=eval_freq,
                                  n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
 
-    '''model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i],
-                learning_rate=linear_schedule(learning_rate),
-                n_epochs=n_epochs, clip_range=linear_schedule(clip_range), gamma=0.995,
-                device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
-                clip_range_vf=clip_range_vf,
-                n_steps=n_steps, policy_kwargs=policy_kwargs)
+    #model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i],
+    #            learning_rate=linear_schedule(learning_rate),
+    #            n_epochs=n_epochs, clip_range=linear_schedule(clip_range), gamma=0.995,
+    #            device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
+    #            clip_range_vf=clip_range_vf,
+    #            n_steps=n_steps, policy_kwargs=policy_kwargs)#
 
-    model.learn(total_timesteps=5000, callback=[rollout_callback, eval_callback],
-                tb_log_name=Training['Logname'][i], progress_bar=True)
-    model.save(Training['Model'][i] + '\\train_model')
-    del model'''
+    #model.learn(total_timesteps=5000, callback=[rollout_callback, eval_callback],
+    #            tb_log_name=Training['Logname'][i], progress_bar=True)
+    #model.save(Training['Model'][i] + '\\train_model')
+    #del model
 
     # Evaluiere Agent, Ergebnisse Dokumentieren
-    model = PPO.load(Training['Model'][i] + '\\best_model', env)
+    #model = PPO.load(Training['Model'][i] + '\\best_model', env)
 
     # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20, warn=False)
     # print(mean_reward)
@@ -197,9 +197,9 @@ for i in range(sim_count):  # sim_count
             datei.write('Steps = ' + str(steps) + "\n")
             datei.write('Return = ' + str(reward_sum) + "\n")
             datei.write('Info = ' + str(info) + "\n")
-    env.close()
+    env.close()'''
 
-for i in range(sim_count):  # sim_count
+for i in range(3,4):  # sim_count range(sim_count)
     os.makedirs(Training['Logs'][i] + '_LSTM', exist_ok=True)
     with open(Training['Logs'][i] + '_LSTM' + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
         # Die Werte in die Datei schreiben, einen pro Zeile
@@ -247,7 +247,8 @@ for i in range(sim_count):  # sim_count
 
     # Eval von 5 Plänen die nicht teil vom Training sind & Eval Rand actions
     open(Training['Logs'][i] + '_LSTM' + '\\' + Training['Logname'][i] + 'Testing_Testing.txt', "w")
-    for j in range(sim_count):
+    # for j in range(sim_count):
+    for j in range(5):
         done = False
         reward_sum = 0
         steps = 0
