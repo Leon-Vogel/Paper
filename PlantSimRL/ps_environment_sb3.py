@@ -181,6 +181,11 @@ class Environment(gym.Env):
         self.observation_space = spaces.Box(low=np.array([liste[0] for liste in self.problem.states.values()]),
                                             high=np.array([liste[1] for liste in self.problem.states.values()]),
                                             dtype=float)
+        self.possible_actions = [''] #ToDo Namen aller gültigen Aktionen, aus Plantsim auslesen
+
+    def valid_action_mask(self): #ToDo valid action ist eine liste mit boolean Werten ob die Aktion an entsprechender Stelle gültig ist. invalid_actions, eine Liste mit den Namen der ungültigen Aktionen muss aus Plantsim gelesen werden
+        valid_actions = [action not in self.invalid_actions for action in self.possible_actions]
+        return np.array(valid_actions)
 
     def step(self, action):
         # a = int(action[0]) # für die eigene Lern Methode

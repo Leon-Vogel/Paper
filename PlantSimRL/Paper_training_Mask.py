@@ -7,6 +7,7 @@ import torch as T
 from sb3_contrib import RecurrentPPO
 from stable_baselines3 import PPO
 from sb3_contrib import MaskablePPO
+from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.common.envs import InvalidActionEnvDiscrete
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.monitor import Monitor
@@ -130,6 +131,14 @@ def clipsched():
     return realclip
 
 
+def mask_fn(env: Environment) -> np.ndarray:
+    # Do whatever you'd like in this function to return the action mask
+    # for the current env. In this example, we assume the env has a
+    # helpful method we can rely on.
+    # ToDo diese Methode leer lassen und mask in env erzeugen
+    return env.valid_action_mask()
+
+
 for i in range(sim_count):  # sim_count
     os.makedirs(Training['Logs'][i] + '_Mask', exist_ok=True)
     with open(Training['Logs'][i] + '_Mask' + '\\' + Training['Logname'][i] + '_Settings.txt', "w") as datei:
@@ -140,7 +149,7 @@ for i in range(sim_count):  # sim_count
                         model=Training['Sim'][i], socket=None, visible=visible)
     env = Environment(plantsim)
     env = Monitor(env, Training['Logs'][i] + '_LSTM', info_keywords=info_keywords)
-    env = InvalidActionEnvDiscrete(dim=5, n_invalid_actions=4)
+    env = ActionMasker(env, mask_fn)
     rollout_callback = CustomCallback(env)
     stop_callback = StopTrainingOnRewardThreshold(reward_threshold=1000, verbose=1)
     eval_callback = EvalCallback(eval_env=env, best_model_save_path=Training['Model'][i] + '_LSTM',
@@ -149,11 +158,11 @@ for i in range(sim_count):  # sim_count
                                  n_eval_episodes=n_eval_episodes, callback_on_new_best=stop_callback)
 
     model = MaskablePPO("MlpPolicy", env, verbose=1, tensorboard_log=Training['Logs'][i] + '_LSTM',
-                         learning_rate=linear_schedule(learning_rate), n_epochs=n_epochs,
-                         clip_range=linear_schedule(clip_range),
-                         device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
-                         clip_range_vf=clip_range_vf,
-                         n_steps=n_steps, policy_kwargs=policy_kwargs)
+                        learning_rate=linear_schedule(learning_rate), n_epochs=n_epochs,
+                        clip_range=linear_schedule(clip_range),
+                        device=T.device('cuda:0' if T.cuda.is_available() else 'cpu'),
+                        clip_range_vf=clip_range_vf,
+                        n_steps=n_steps, policy_kwargs=policy_kwargs)
 
     model.learn(total_timesteps=total_timesteps, callback=[rollout_callback, eval_callback],
                 tb_log_name=Training['Logname'][i], progress_bar=True)
@@ -172,8 +181,10 @@ for i in range(sim_count):  # sim_count
     # Episode start signals are used to reset the lstm states
     episode_starts = np.ones((num_envs,), dtype=bool)
     dones = False
+    valid_action_array = np.array([1, 0])
     while not dones:
-        action, lstm_states = model.predict(obs, state=lstm_states, episode_start=episode_starts, deterministic=True)
+        action, lstm_states = model.predict(obs, action_masks=valid_action_array, episode_start=episode_starts,
+                                            deterministic=True)
         obs, rewards, dones, info = env.step(action)
         episode_starts = dones
 
