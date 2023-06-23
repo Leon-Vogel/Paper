@@ -2,6 +2,7 @@ import itertools
 import random
 from random import seed
 from time import sleep
+from typing import List
 
 import gym
 import numpy as np
@@ -181,18 +182,21 @@ class Environment(gym.Env):
         self.observation_space = spaces.Box(low=np.array([liste[0] for liste in self.problem.states.values()]),
                                             high=np.array([liste[1] for liste in self.problem.states.values()]),
                                             dtype=float)
-        self.possible_actions = [''] #ToDo Namen aller gültigen Aktionen, aus Plantsim auslesen
+        #self.possible_actions = ['']
+        self.space = self.action_space
+        self.possible_actions = np.arange(self.space.n) #possible_actions = [0 1 2 3 4]
+        self.invalid_actions: List[int] = []
 
-    def valid_action_mask(self): #ToDo valid action ist eine liste mit boolean Werten ob die Aktion an entsprechender Stelle gültig ist. invalid_actions, eine Liste mit den Namen der ungültigen Aktionen muss aus Plantsim gelesen werden
+    def valid_action_mask(self): #ToDo: valid action ist eine liste mit boolean Werten ob die Aktion an entsprechender Stelle gültig ist. invalid_actions, eine Liste mit den Namen der ungültigen Aktionen muss aus Plantsim gelesen werden
         valid_actions = [action not in self.invalid_actions for action in self.possible_actions]
         return np.array(valid_actions)
-
+                            #ToDo In Sim: ungültige Aktion erkennen und mit state ausgeben
     def step(self, action):
         # a = int(action[0]) # für die eigene Lern Methode
         a = action  # für die sb3 model.learn
         a = self.problem.actions[a]
         self.problem.act(a)
-        self.current_state = self.problem.get_current_state()
+        self.current_state = self.problem.get_current_state() #ToDo: ungültige Aktionen auslesen, Format wie actions
         self.new_observation = np.array(self.current_state.to_state())
         self.reward = -1 * self.problem.get_reward(self.current_state)
         self.done = self.problem.is_goal_state(self.current_state)
