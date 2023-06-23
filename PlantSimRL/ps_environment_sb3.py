@@ -145,19 +145,19 @@ class Environment(gym.Env):
         self.info = None
         self.plan = {
             'Typ1': [93, 79, 90, 93, 91, 70, 95, 89, 78, 98,
-                     100, 100, 90, 80, 90, 75, 84, 97, 80,90, 83],
+                     100, 100, 90, 80, 90, 75, 84, 97, 80, 90, 83],
 
             'Typ2': [86, 73, 69, 89, 85, 74, 71, 61, 86, 67,
-                     60, 80, 70, 60, 75, 80, 76, 73, 80,85, 77],
+                     60, 80, 70, 60, 75, 80, 76, 73, 80, 85, 77],
 
             'Typ3': [53, 75, 59, 56, 65, 73, 66, 76, 60, 61,
-                     50, 70, 60, 80, 60, 75, 65, 60, 75,55, 65],
+                     50, 70, 60, 80, 60, 75, 65, 60, 75, 55, 65],
 
             'Typ4': [35, 40, 47, 33, 33, 43, 35, 43, 40, 36,
-                     50, 30, 45, 45, 45, 40, 45, 40, 35,35, 40],
+                     50, 30, 45, 45, 45, 40, 45, 40, 35, 35, 40],
 
             'Typ5': [33, 33, 35, 29, 26, 40, 33, 31, 36, 38,
-                     40, 20, 35, 45, 30, 30, 40, 30, 30,35, 45],
+                     40, 20, 35, 45, 30, 30, 40, 30, 30, 35, 45],
 
             'Total': [300, 300, 300, 300, 300, 300, 300, 300, 300, 300,
                       300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300]
@@ -182,21 +182,25 @@ class Environment(gym.Env):
         self.observation_space = spaces.Box(low=np.array([liste[0] for liste in self.problem.states.values()]),
                                             high=np.array([liste[1] for liste in self.problem.states.values()]),
                                             dtype=float)
-        #self.possible_actions = ['']
+        # self.possible_actions = ['']
         self.space = self.action_space
-        self.possible_actions = np.arange(self.space.n) #possible_actions = [0 1 2 3 4]
-        self.invalid_actions: List[int] = []
+        self.valid_actions = self.problem.plantsim.get_object("Maske").get_columns_by_header("Name")
+        # ToDo Maske nummerieren anstatt Namen
+        # self.possible_actions = np.arange(self.space.n) #possible_actions = [0 1 2 3 4]
+        # self.invalid_actions: List[int] = []
 
-    def valid_action_mask(self): #ToDo: valid action ist eine liste mit boolean Werten ob die Aktion an entsprechender Stelle gültig ist. invalid_actions, eine Liste mit den Namen der ungültigen Aktionen muss aus Plantsim gelesen werden
-        valid_actions = [action not in self.invalid_actions for action in self.possible_actions]
-        return np.array(valid_actions)
-                            #ToDo In Sim: ungültige Aktion erkennen und mit state ausgeben
+    def valid_action_mask(self):  # ToDo: valid action ist eine liste mit boolean Werten ob die Aktion an entsprechender Stelle gültig ist. invalid_actions, eine Liste mit den Namen der ungültigen Aktionen muss aus Plantsim gelesen werden
+        self.valid_actions = self.problem.plantsim.get_object("Maske").get_columns_by_header("Name")
+        # valid_actions = [action not in self.invalid_actions for action in self.possible_actions]
+        return self.valid_actions
+        # ToDo In Sim: ungültige Aktion erkennen und mit state ausgeben
+
     def step(self, action):
         # a = int(action[0]) # für die eigene Lern Methode
         a = action  # für die sb3 model.learn
         a = self.problem.actions[a]
         self.problem.act(a)
-        self.current_state = self.problem.get_current_state() #ToDo: ungültige Aktionen auslesen, Format wie actions
+        self.current_state = self.problem.get_current_state()  # ToDo: ungültige Aktionen auslesen, Format wie actions
         self.new_observation = np.array(self.current_state.to_state())
         self.reward = -1 * self.problem.get_reward(self.current_state)
         self.done = self.problem.is_goal_state(self.current_state)

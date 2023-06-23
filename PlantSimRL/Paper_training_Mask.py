@@ -28,7 +28,7 @@ erg = 'ergebnisse_Mask\\'
 mod = 'models_Mask\\'  # _V1
 net_arch = dict(pi=[256, 256, 128, 64], vf=[256, 256, 128, 64])
 Training = {
-    'Sim': [pfad + '\RL_Sim_V00_inter.spp', pfad + '\RL_Sim_V1_inter.spp',
+    'Sim': [pfad + '\RL_Sim_Mask.spp', pfad + '\RL_Sim_V00_inter.spp', pfad + '\RL_Sim_V1_inter.spp',
             # pfad + '\RL_Sim_V20_inter.spp', pfad + '\RL_Sim_V3_inter.spp',
             pfad + '\RL_Sim_V4_inter.spp', pfad + '\RL_Sim_V5_inter.spp'],
     'Logs': [erg + 'R_V00_PPO', erg + 'R_V1_PPO',
