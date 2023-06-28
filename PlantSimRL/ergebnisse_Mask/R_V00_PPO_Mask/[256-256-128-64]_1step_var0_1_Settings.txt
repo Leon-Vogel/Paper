@@ -7,4 +7,4 @@ n_steps = 384
 clip_range = 0.15
 clip_range_vf = None
 total_timesteps = 75000
-Sim = ['D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_Mask.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V00_inter.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V1_inter.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V4_inter.spp', 'D:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V5_inter.spp']
+Sim = ['E:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_Mask.spp', 'E:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V00_inter.spp', 'E:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V1_inter.spp', 'E:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V4_inter.spp', 'E:\\Studium\\Projekt\\Paper\\PlantSimRL\\simulations\\RL_Sim_V5_inter.spp']

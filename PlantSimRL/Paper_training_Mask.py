@@ -12,6 +12,7 @@ from sb3_contrib.common.envs import InvalidActionEnvDiscrete
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.monitor import Monitor
 from sb3_contrib.common.maskable.utils import get_action_masks
+from sb3_contrib.common.wrappers import ActionMasker
 
 from CustomCallbacks import CustomCallback
 from plantsim.plantsim import Plantsim
@@ -21,58 +22,26 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 # Parameter für alle Trainings festlegen, Netz, lernrate etc.
 # Directory für Ergebnisse definieren (evtl mit Dictionary?)
-# pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
+pfad = 'E:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 # pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
-pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
+# pfad = 'D:\\Studium\Projekt\Paper\PlantSimRL\simulations'
 erg = 'ergebnisse_Mask\\'
 mod = 'models_Mask\\'  # _V1
 net_arch = dict(pi=[256, 256, 128, 64], vf=[256, 256, 128, 64])
 Training = {
     'Sim': [pfad + '\RL_Sim_Mask.spp', pfad + '\RL_Sim_V00_inter.spp', pfad + '\RL_Sim_V1_inter.spp',
-            # pfad + '\RL_Sim_V20_inter.spp', pfad + '\RL_Sim_V3_inter.spp',
             pfad + '\RL_Sim_V4_inter.spp', pfad + '\RL_Sim_V5_inter.spp'],
     'Logs': [erg + 'R_V00_PPO', erg + 'R_V1_PPO',
-             # erg + 'R_V20_PPO', erg + 'R_V3_PPO',
              erg + 'R_V4_PPO', erg + 'R_V5_PPO'],
     'Logname': [str(net_arch['pi']).replace(", ", "-") + '_1step_var0_1',
-                # str(net_arch['pi']).replace(", ", "-") + '_1step_var0_1',
-                # str(net_arch['pi']).replace(", ", "-") + '_1step_var0_1',
                 str(net_arch['pi']).replace(", ", "-") + '_1step_var0_1',
                 str(net_arch['pi']).replace(", ", "-") + '_1step_var0_1',
                 str(net_arch['pi']).replace(", ", "-") + '_1step_var0_1'],
     'Model': [mod + 'R_V00_PPO', mod + 'R_V1_PPO',
-              # mod + 'R_V20_PPO', mod + 'R_V3_PPO',
               mod + 'R_V4_PPO', mod + 'R_V5_PPO']
 }
 sim_count = len(Training['Sim'])
-'''Training = {
-    'Sim': [pfad + '\RL_Sim_V0_inter.spp', pfad + '\RL_Sim_V1_inter.spp',
-            pfad + '\RL_Sim_V2_inter.spp', pfad + '\RL_Sim_V3_inter.spp',
-            pfad + '\RL_Sim_V5_sparse.spp'],
-    'Logs': [erg + 'R_V0_PPO', erg + 'R_V1_PPO', erg + 'R_V2_PPO', erg + 'R_V3_PPO', erg + 'R_V4_PPO'],
-    'Logname': ['512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1',
-                '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1'],
-    'Model': [mod + 'R_V0_PPO', mod + 'R_V1_PPO', mod + 'R_V2_PPO', mod + 'R_V3_PPO', mod + 'R_V4_PPO']
-}'''
-'''
-Training = {
-    'Sim': [pfad + '\RL_Sim_20230317_inter.spp', pfad + '\RL_Sim_20230317_sparse.spp',
-            pfad + '\RL_Sim_20230317_inter.spp',
-            pfad + '\RL_Sim_20230317_sparse.spp'],
-    'Logs': [erg + 'R_In_PPO', erg + 'R_Sp_PPO', erg + 'R_In_PPO_LSTM', erg + 'R_Sp_PPO_LSTM'],
-    'Logname': ['512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1', '512-256-128-128-64_1step_var0_1',
-                '512-256-128-128-64_1step_var0_1'],
-    'Model': [mod + 'R_In_PPO', mod + 'R_Sp_PPO', mod + 'R_In_PPO_LSTM', mod + 'R_Sp_PPO_LSTM']
-}'''
-'''
-Training = {
-    'Sim': [pfad + '\RL_Sim_20230310.spp', pfad + '\R2.spp', pfad + '\R3.spp', pfad + '\RL_Sim_20230310.spp',
-            pfad + '\R2.spp', pfad + '\R3.spp'],
-    'Logs': [erg + 'R1_PPO', erg + 'R2_PPO', erg + 'R3_PPO', erg + 'R1_PPO_LSTM', erg + 'R2_PPO_LSTM',
-             erg + 'R3_PPO_LSTM'],
-    'Model': [mod + 'R1_PPO', mod + 'R2_PPO', mod + 'R3_PPO', mod + 'R1_PPO_LSTM', mod + 'R2_PPO_LSTM',
-             mod + 'R3_PPO_LSTM'],
-}'''
+
 # os.makedirs(logs, exist_ok=True)
 policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=net_arch)
 # policy_kwargs = dict(activation_fn=T.nn.LeakyReLU, net_arch=dict(pi=[256, 128, 64, 32, 16], vf=[256, 128, 64, 32, 16]))
@@ -135,7 +104,6 @@ def mask_fn(env: Environment) -> np.ndarray:
     # Do whatever you'd like in this function to return the action mask
     # for the current env. In this example, we assume the env has a
     # helpful method we can rely on.
-    # ToDo diese Methode leer lassen und mask in env erzeugen
     return env.valid_action_mask()
 
 
